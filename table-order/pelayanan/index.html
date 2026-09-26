@@ -102,7 +102,6 @@
             color: var(--primary);
         }
 
-        /* Overlay untuk mobile sidebar */
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -166,7 +165,6 @@
             padding: 0.25rem;
         }
 
-        /* Floating Alarm Banner (Muncul saat ada alarm bunyi) */
         #alarm-banner {
             display: none;
             background: #fee2e2;
@@ -185,7 +183,6 @@
             to { background-color: #fecaca; transform: scale(1.005); }
         }
 
-        /* Notifikasi Panggilan Pelayan */
         .call-banner {
             background: #fef3c7;
             border: 1px solid #fde68a;
@@ -226,7 +223,6 @@
             font-weight: 700;
         }
 
-        /* Grid Pesanan Masuk */
         .orders-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -262,7 +258,7 @@
 
         .order-items-list {
             margin-bottom: 0.75rem;
-            max-height: 140px;
+            max-height: 120px;
             overflow-y: auto;
         }
 
@@ -273,6 +269,30 @@
             margin-bottom: 0.3rem;
             color: var(--text-main);
             gap: 0.5rem;
+        }
+
+        /* Container Bukti Transfer di Kartu Kasir */
+        .proof-box {
+            background: var(--bg-body);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem;
+            margin-bottom: 0.75rem;
+            text-align: center;
+        }
+
+        .proof-thumb {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition);
+        }
+
+        .proof-thumb:hover {
+            opacity: 0.9;
         }
 
         .badge {
@@ -312,7 +332,26 @@
         .btn-danger { background: #fee2e2; color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: #fff; }
 
-        /* Sound Alert Overlay to unlock Audio Context */
+        /* Modal Preview Gambar Fullscreen */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: var(--radius-md);
+            object-fit: contain;
+            background: #fff;
+        }
+
         #audio-unlock-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -327,7 +366,6 @@
             padding: 1.5rem;
         }
 
-        /* Responsif Media Query untuk HP */
         @media(max-width: 768px) {
             aside {
                 transform: translateX(-100%);
@@ -366,13 +404,21 @@
 </head>
 <body>
 
-    <!-- Modal Aktivasi Suara (Wajib diklik sekali agar browser mengizinkan audio) -->
+    <!-- Modal Aktivasi Suara -->
     <div id="audio-unlock-modal">
         <div style="background: white; color: var(--text-main); padding: 2rem; border-radius: 1rem; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
             <i class="fas fa-volume-up" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
             <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Aktifkan Suara Notifikasi</h2>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem;">Klik tombol di bawah ini untuk mengizinkan alarm suara berulang saat pesanan atau panggilan baru masuk dari database.</p>
             <button class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;" onclick="unlockAudio()">Aktifkan & Masuk Kasir</button>
+        </div>
+    </div>
+
+    <!-- Modal Fullscreen Preview Bukti Transfer -->
+    <div class="image-modal" id="proof-modal" onclick="closeProofModal()">
+        <div style="position: relative; text-align: center;" onclick="event.stopPropagation()">
+            <button onclick="closeProofModal()" style="position: absolute; top: -15px; right: -15px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-times"></i></button>
+            <img id="modal-proof-img" src="" alt="Bukti Transfer Full">
         </div>
     </div>
 
@@ -400,7 +446,7 @@
                 </button>
                 <div>
                     <h1>Dashboard Kasir & Pelayan Meja</h1>
-                    <p>Terima pesanan masuk real-time dari database dan kelola status penyajian meja.</p>
+                    <p>Terima pesanan masuk real-time beserta bukti transfer dari pelanggan.</p>
                 </div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
@@ -409,7 +455,7 @@
             </div>
         </header>
 
-        <!-- Banner Peringatan Alarm Berdering (Muncul Otomatis) -->
+        <!-- Banner Peringatan Alarm Berdering -->
         <div id="alarm-banner">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <i class="fas fa-triangle-exclamation fa-bounce" style="font-size: 1.5rem; color: #ef4444;"></i>
@@ -424,9 +470,7 @@
         </div>
 
         <!-- Panggilan Pelayan Alert Container -->
-        <div id="waiter-call-container">
-            <!-- Rendered via JS -->
-        </div>
+        <div id="waiter-call-container"></div>
 
         <!-- Daftar Pesanan Masuk -->
         <div class="section-box">
@@ -466,7 +510,6 @@
             setupRealtimeSubscriptions();
         }
 
-        // Fungsi Membunyikan 1 Siklus Beep Keras
         function playSingleBeep() {
             if (!audioCtx) return;
             if (audioCtx.state === 'suspended') {
@@ -527,12 +570,10 @@
             startContinuousAlarm();
         }
 
-        // Setup Realtime Subscription Supabase untuk tabel 'orders' dan 'calls'
         function setupRealtimeSubscriptions() {
             _supabase
               .channel('public:orders_and_calls')
               .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
-                  console.log('Pesanan baru masuk:', payload);
                   loadOrders();
                   startContinuousAlarm();
               })
@@ -540,7 +581,6 @@
                   loadOrders();
               })
               .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'calls' }, payload => {
-                  console.log('Panggilan pelayan baru:', payload);
                   loadWaiterCalls();
                   startContinuousAlarm();
               })
@@ -551,7 +591,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Backup polling tiap 5 detik jika real-time terputus
             setInterval(() => {
                 if (audioCtx) {
                     loadOrders();
@@ -567,16 +606,11 @@
             overlay.classList.toggle('show');
         }
 
-        // Ambil Panggilan Pelayan dari Database Supabase
         async function loadWaiterCalls() {
             const container = document.getElementById('waiter-call-container');
             const { data, error } = await _supabase.from('calls').select('*').order('id', { ascending: false });
             
-            if (error) {
-                console.error('Gagal memuat panggilan pelayan:', error);
-                return;
-            }
-
+            if (error) return;
             callsList = data || [];
 
             if (lastCallCount === -1) {
@@ -611,24 +645,15 @@
         }
 
         async function resolveCall(id) {
-            const { error } = await _supabase.from('calls').delete().eq('id', id);
-            if (error) {
-                alert('Gagal menyelesaikan panggilan: ' + error.message);
-                return;
-            }
+            await _supabase.from('calls').delete().eq('id', id);
             loadWaiterCalls();
         }
 
-        // Ambil Daftar Pesanan dari Database Supabase
         async function loadOrders() {
             const container = document.getElementById('orders-grid-container');
             const { data, error } = await _supabase.from('orders').select('*').order('time', { ascending: false });
             
-            if (error) {
-                console.error('Gagal memuat pesanan dari database:', error);
-                return;
-            }
-
+            if (error) return;
             ordersList = data || [];
 
             if (lastOrderCount === -1) {
@@ -653,7 +678,6 @@
                 if (order.status === 'Selesai') badgeClass = 'badge-selesai';
 
                 let itemsHtml = '';
-                // Handle items jika disimpan sebagai JSON array di Supabase
                 const itemsArray = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
                 
                 itemsArray.forEach(item => {
@@ -664,6 +688,18 @@
                         </div>
                     `;
                 });
+
+                // Bagian Pratinjau Bukti Transfer jika ada
+                let proofHtml = '';
+                if (order.paymentProof) {
+                    proofHtml = `
+                        <div class="proof-box">
+                            <p style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-bottom: 3px;"><i class="fas fa-receipt"></i> Bukti Pembayaran (${order.paymentMethod}):</p>
+                            <img src="${order.paymentProof}" class="proof-thumb" onclick="openProofModal('${order.paymentProof}')" alt="Bukti Transfer">
+                            <small style="font-size: 0.55rem; color: var(--primary); display: block; margin-top: 2px;">Klik gambar untuk memperbesar</small>
+                        </div>
+                    `;
+                }
 
                 container.innerHTML += `
                     <div class="order-card">
@@ -678,6 +714,7 @@
                             <div class="order-items-list">
                                 ${itemsHtml}
                             </div>
+                            ${proofHtml}
                         </div>
                         <div>
                             <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; margin-bottom: 0.75rem;">
@@ -696,30 +733,23 @@
             });
         }
 
-        async function updateOrderStatus(id, newStatus) {
-            const { error } = await _supabase
-                .from('orders')
-                .update({ status: newStatus })
-                .eq('id', id);
+        function openProofModal(imgSrc) {
+            document.getElementById('modal-proof-img').src = imgSrc;
+            document.getElementById('proof-modal').style.display = 'flex';
+        }
 
-            if (error) {
-                alert('Gagal memperbarui status pesanan: ' + error.message);
-                return;
-            }
+        function closeProofModal() {
+            document.getElementById('proof-modal').style.display = 'none';
+        }
+
+        async function updateOrderStatus(id, newStatus) {
+            await _supabase.from('orders').update({ status: newStatus }).eq('id', id);
             loadOrders();
         }
 
         async function deleteOrder(id) {
             if (confirm('Hapus riwayat pesanan ini dari database?')) {
-                const { error } = await _supabase
-                    .from('orders')
-                    .delete()
-                    .eq('id', id);
-
-                if (error) {
-                    alert('Gagal menghapus pesanan: ' + error.message);
-                    return;
-                }
+                await _supabase.from('orders').delete().eq('id', id);
                 loadOrders();
             }
         }
