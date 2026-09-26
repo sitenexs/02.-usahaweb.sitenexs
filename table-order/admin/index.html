@@ -408,6 +408,33 @@
         .badge-minuman { background: var(--badge-minuman-bg); color: var(--badge-minuman-text); }
         .badge-snack { background: var(--badge-snack-bg); color: var(--badge-snack-text); }
 
+        /* Toast Notification Styling */
+        #toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e293b;
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 3000;
+            font-size: 0.85rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        #toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        #toast-notification.success { background: var(--success); }
+        #toast-notification.error { background: var(--danger); }
+        #toast-notification.info { background: var(--primary); }
+
         /* Responsif Media Query untuk HP */
         @media(max-width: 768px) {
             aside {
@@ -460,6 +487,12 @@
 
     <!-- Overlay Sidebar HP -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast-notification">
+        <i id="toast-icon" class="fas fa-info-circle"></i>
+        <span id="toast-message">Pesan notifikasi...</span>
+    </div>
 
     <!-- Sidebar Admin -->
     <aside id="sidebar">
@@ -572,7 +605,7 @@
                     <input type="hidden" id="product-img" required>
                     <div class="img-preview-container">
                         <img id="img-preview-box" class="img-preview" src="" alt="Pratinjau">
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">Maks. 1MB (JPG, PNG, WEBP)</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Maks. 50MB (JPG, PNG, WEBP)</span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -581,7 +614,7 @@
                 </div>
                 <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
                     <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Batal</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Produk</button>
+                    <button type="submit" id="btn-submit-product" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Produk</button>
                 </div>
             </form>
         </div>
@@ -597,12 +630,37 @@
 
         let products = [];
 
+        // Fungsi Menampilkan Notifikasi Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toast.className = '';
+            toast.classList.add(type);
+
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle';
+            } else if (type === 'error') {
+                toastIcon.className = 'fas fa-exclamation-circle';
+            } else {
+                toastIcon.className = 'fas fa-info-circle';
+            }
+
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
         // 1. Ambil Data dari Supabase saat halaman dimuat
         async function fetchProducts() {
             const { data, error } = await _supabase.from('products').select('*');
             if (error) {
                 console.error('Gagal memuat produk dari Supabase:', error);
-                alert('Gagal terhubung ke database: ' + error.message);
+                showToast('Gagal terhubung ke database: ' + error.message, 'error');
                 return;
             }
             products = data || [];
@@ -701,24 +759,28 @@
             closeModal('product-modal');
         }
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                if (file.size > 1024 * 1024) {
-                    alert('Ukuran gambar terlalu besar! Harap unggah gambar dengan ukuran maksimal 1 MB.');
-                    event.target.value = '';
-                    return;
-                }
+        async function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64String = e.target.result;
-                    document.getElementById('product-img').value = base64String;
-                    document.getElementById('img-preview-box').src = base64String;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
+  const fileName = Date.now() + "-" + file.name;
+
+  const { error } = await _supabase.storage
+    .from("product-images")
+    .upload(fileName, file);
+
+  if (error) {
+    showToast(error.message, "error");
+    return;
+  }
+
+  const { data } = _supabase.storage
+    .from("product-images")
+    .getPublicUrl(fileName);
+
+  document.getElementById("product-img").value = data.publicUrl;
+  document.getElementById("img-preview-box").src = data.publicUrl;
+}
 
         // 2. Simpan atau Perbarui Produk ke Supabase
         async function saveProduct(e) {
@@ -731,9 +793,18 @@
             const desc = document.getElementById('product-desc').value;
 
             if (!img) {
-                alert('Silakan pilih atau unggah gambar terlebih dahulu!');
+                showToast('Silakan pilih atau unggah gambar terlebih dahulu!', 'error');
                 return;
             }
+
+            const submitBtn = document.getElementById('btn-submit-product');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            showToast('Sedang menyimpan produk...', 'info');
+
+            let errorResult = null;
 
             if (id) {
                 // Update data yang ada
@@ -741,25 +812,25 @@
                     .from('products')
                     .update({ name, category, price, img, desc })
                     .eq('id', parseInt(id));
-
-                if (error) {
-                    alert('Gagal memperbarui produk: ' + error.message);
-                    return;
-                }
+                errorResult = error;
             } else {
                 // Tambah data baru
                 const { error } = await _supabase
                     .from('products')
                     .insert([{ name, category, price, img, desc }]);
-
-                if (error) {
-                    alert('Gagal menambah produk baru: ' + error.message);
-                    return;
-                }
+                errorResult = error;
             }
 
-            fetchProducts(); // Refresh data dari server
-            closeProductModal();
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+
+            if (errorResult) {
+                showToast('Gagal menyimpan produk: ' + errorResult.message, 'error');
+            } else {
+                showToast('Produk berhasil disimpan!', 'success');
+                fetchProducts(); // Refresh data dari server
+                closeProductModal();
+            }
         }
 
         // 3. Hapus Produk dari Supabase
@@ -771,8 +842,9 @@
                     .eq('id', id);
 
                 if (error) {
-                    alert('Gagal menghapus produk: ' + error.message);
+                    showToast('Gagal menghapus produk: ' + error.message, 'error');
                 } else {
+                    showToast('Produk berhasil dihapus.', 'success');
                     fetchProducts(); // Refresh data dari server
                 }
             }
