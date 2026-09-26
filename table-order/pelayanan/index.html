@@ -85,19 +85,26 @@
             margin-bottom: 0.25rem;
         }
 
-        .sidebar-menu a {
+        .sidebar-menu a, .sidebar-menu button {
+            width: 100%;
             display: flex;
             align-items: center;
             gap: 0.6rem;
             padding: 0.6rem 0.75rem;
             color: var(--text-muted);
+            background: none;
+            border: none;
+            text-align: left;
             text-decoration: none;
+            font-family: inherit;
+            font-size: 0.825rem;
             font-weight: 600;
             border-radius: var(--radius-sm);
+            cursor: pointer;
             transition: var(--transition);
         }
 
-        .sidebar-menu a:hover, .sidebar-menu a.active {
+        .sidebar-menu a:hover, .sidebar-menu a.active, .sidebar-menu button:hover {
             background: var(--primary-light);
             color: var(--primary);
         }
@@ -216,11 +223,40 @@
             align-items: center;
             margin-bottom: 1rem;
             gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .section-header h3 {
             font-size: 1rem;
             font-weight: 700;
+        }
+
+        /* Filter Tab Nav */
+        .filter-tabs {
+            display: flex;
+            gap: 0.35rem;
+            background: var(--bg-body);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .filter-tab {
+            background: none;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-tab.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
         }
 
         .orders-grid {
@@ -271,7 +307,6 @@
             gap: 0.5rem;
         }
 
-        /* Container Bukti Transfer di Kartu Kasir */
         .proof-box {
             background: var(--bg-body);
             border: 1px solid var(--border-subtle);
@@ -332,8 +367,7 @@
         .btn-danger { background: #fee2e2; color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: #fff; }
 
-        /* Modal Preview Gambar Fullscreen */
-        .image-modal {
+        .image-modal, .settings-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -352,6 +386,15 @@
             background: #fff;
         }
 
+        .settings-content {
+            background: #fff;
+            width: 100%;
+            max-width: 400px;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+        }
+
         #audio-unlock-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -367,54 +410,51 @@
         }
 
         @media(max-width: 768px) {
-            aside {
-                transform: translateX(-100%);
-            }
-            aside.show {
-                transform: translateX(0);
-            }
-            main {
-                margin-left: 0;
-                max-width: 100vw;
-                padding: 1rem 0.75rem;
-            }
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 1rem;
-            }
-            .mobile-toggle-btn {
-                display: inline-block;
-            }
-            header .btn-secondary {
-                width: 100%;
-            }
-            .call-banner {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .call-banner .btn {
-                width: 100%;
-            }
-            .orders-grid {
-                grid-template-columns: 1fr;
-            }
+            aside { transform: translateX(-100%); }
+            aside.show { transform: translateX(0); }
+            main { margin-left: 0; max-width: 100vw; padding: 1rem 0.75rem; }
+            header { flex-direction: column; align-items: flex-start; padding: 1rem; }
+            .mobile-toggle-btn { display: inline-block; }
+            header .btn-secondary { width: 100%; }
+            .call-banner { flex-direction: column; align-items: flex-start; }
+            .call-banner .btn { width: 100%; }
+            .orders-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Modal Aktivasi Suara -->
     <div id="audio-unlock-modal">
         <div style="background: white; color: var(--text-main); padding: 2rem; border-radius: 1rem; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
             <i class="fas fa-volume-up" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
             <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Aktifkan Suara Notifikasi</h2>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem;">Klik tombol di bawah ini untuk mengizinkan alarm suara berulang saat pesanan atau panggilan baru masuk dari database.</p>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem;">Klik tombol di bawah ini untuk mengizinkan alarm suara dan mendownload otomatis berkas pesanan baru.</p>
             <button class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;" onclick="unlockAudio()">Aktifkan & Masuk Kasir</button>
         </div>
     </div>
 
-    <!-- Modal Fullscreen Preview Bukti Transfer -->
+    <!-- Modal Pengaturan Suara Dering -->
+    <div class="settings-modal" id="settings-modal">
+        <div class="settings-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1rem; font-weight: 700;"><i class="fas fa-sliders"></i> Pengaturan Suara Dering</h3>
+                <button onclick="closeSettingsModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.75rem; color: var(--text-muted);">Pilih Nada Dering Notifikasi:</label>
+                <select id="sound-style-select" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8rem;" onchange="saveSoundPreference(this.value)">
+                    <option value="beep">Beep Digital Klasik</option>
+                    <option value="chime">Bel Restoran / Chime</option>
+                    <option value="siren">Sirene Peringatan</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="testAlarm()"><i class="fas fa-play"></i> Tes Suara Dering</button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="closeSettingsModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <div class="image-modal" id="proof-modal" onclick="closeProofModal()">
         <div style="position: relative; text-align: center;" onclick="event.stopPropagation()">
             <button onclick="closeProofModal()" style="position: absolute; top: -15px; right: -15px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas fa-times"></i></button>
@@ -422,22 +462,19 @@
         </div>
     </div>
 
-    <!-- Overlay Sidebar HP -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar Pelayan / Kasir -->
     <aside id="sidebar">
         <div class="sidebar-brand">
             <i class="fas fa-cash-register"></i> <span>Sitenexs Kasir</span>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="admin.html"><i class="fas fa-burger"></i> <span>Kelola Produk</span></a></li>
             <li><a href="#" class="active"><i class="fas fa-cash-register"></i> <span>Kasir / Pelayan</span></a></li>
+            <li><button onclick="openSettingsModal()"><i class="fas fa-volume-high"></i> <span>Ubah Suara Dering</span></button></li>
             <li><a href="pesan.html" target="_blank"><i class="fas fa-external-link-alt"></i> <span>Buka Menu Pelanggan</span></a></li>
         </ul>
     </aside>
 
-    <!-- Main Section -->
     <main>
         <header>
             <div class="header-top">
@@ -446,7 +483,7 @@
                 </button>
                 <div>
                     <h1>Dashboard Kasir & Pelayan Meja</h1>
-                    <p>Terima pesanan masuk real-time beserta bukti transfer dari pelanggan.</p>
+                    <p>Sistem otomatis mendownload struk pesanan & bukti transfer, serta membersihkan riwayat lama setiap 2 jam.</p>
                 </div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
@@ -455,13 +492,12 @@
             </div>
         </header>
 
-        <!-- Banner Peringatan Alarm Berdering -->
         <div id="alarm-banner">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <i class="fas fa-triangle-exclamation fa-bounce" style="font-size: 1.5rem; color: #ef4444;"></i>
                 <div>
                     <strong style="font-size: 0.9rem; color: #991b1b;">PERINGATAN: ADA PESANAN / PANGGILAN BARU!</strong>
-                    <p style="font-size: 0.75rem; color: #b91c1c;">Alarm berdering terus menerus sampai Anda menekan tombol matikan.</p>
+                    <p style="font-size: 0.75rem; color: #b91c1c;">Struk & Bukti Transfer telah otomatis terdownload ke perangkat Anda.</p>
                 </div>
             </div>
             <button class="btn btn-danger" style="background: #ef4444; color: #fff; padding: 0.6rem 1rem; font-size: 0.85rem;" onclick="stopAlarmManual()">
@@ -469,14 +505,18 @@
             </button>
         </div>
 
-        <!-- Panggilan Pelayan Alert Container -->
         <div id="waiter-call-container"></div>
 
-        <!-- Daftar Pesanan Masuk -->
         <div class="section-box">
             <div class="section-header">
-                <h3>Daftar Pesanan Masuk Pelanggan</h3>
-                <span id="active-order-count" style="font-weight: 700; color: var(--primary);">0 Pesanan Aktif</span>
+                <h3>Daftar Pesanan Pelanggan</h3>
+                <!-- Filter Tab Navigasi -->
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="setFilter('semua', this)">Semua</button>
+                    <button class="filter-tab" onclick="setFilter('Menunggu', this)">Pesan Masuk</button>
+                    <button class="filter-tab" onclick="setFilter('Diproses', this)">Diproses</button>
+                    <button class="filter-tab" onclick="setFilter('Selesai', this)">Selesai</button>
+                </div>
             </div>
             <div id="orders-grid-container" class="orders-grid">
                 <!-- Rendered via JS -->
@@ -485,7 +525,6 @@
     </main>
 
     <script>
-        // Konfigurasi Supabase dengan Anon Key yang Valid
         const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
 
@@ -500,22 +539,56 @@
 
         let ordersList = [];
         let callsList = [];
+        let currentFilter = 'semua';
+        let currentSoundStyle = localStorage.getItem('sitenexs_sound_style') || 'beep';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const selectEl = document.getElementById('sound-style-select');
+            if (selectEl) selectEl.value = currentSoundStyle;
+        });
 
         function unlockAudio() {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             document.getElementById('audio-unlock-modal').style.display = 'none';
-            playSingleBeep(); 
+            playNotificationSound(); 
             loadOrders();
             loadWaiterCalls();
             setupRealtimeSubscriptions();
+            initCleanupTask();
         }
 
-        function playSingleBeep() {
-            if (!audioCtx) return;
+        function saveSoundPreference(val) {
+            currentSoundStyle = val;
+            localStorage.setItem('sitenexs_sound_style', val);
+            playNotificationSound();
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        function playNotificationSound() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
 
+            if (currentSoundStyle === 'chime') {
+                playChimeSound();
+            } else if (currentSoundStyle === 'siren') {
+                playSirenSound();
+            } else {
+                playBeepSound();
+            }
+        }
+
+        function playBeepSound() {
             for (let i = 0; i < 3; i++) {
                 setTimeout(() => {
                     try {
@@ -535,9 +608,59 @@
                         osc.start();
                         osc.stop(audioCtx.currentTime + 0.3);
                     } catch (e) {
-                        console.error("Gagal memutar audio:", e);
+                        console.error(e);
                     }
                 }, i * 350);
+            }
+        }
+
+        function playChimeSound() {
+            // Bel Restoran / Chime nada tinggi lembut
+            const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            frequencies.forEach((freq, idx) => {
+                setTimeout(() => {
+                    try {
+                        let osc = audioCtx.createOscillator();
+                        let gainNode = audioCtx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                        gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+
+                        osc.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.6);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }, idx * 120);
+            });
+        }
+
+        function playSirenSound() {
+            try {
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 0.4);
+                osc.frequency.linearRampToValueAtTime(400, audioCtx.currentTime + 0.8);
+
+                gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.9);
+
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.9);
+            } catch (e) {
+                console.error(e);
             }
         }
 
@@ -546,11 +669,11 @@
             isAlarmActive = true;
             document.getElementById('alarm-banner').style.display = 'flex';
 
-            playSingleBeep();
+            playNotificationSound();
             if (alarmInterval) clearInterval(alarmInterval);
             alarmInterval = setInterval(() => {
-                playSingleBeep();
-            }, 2000);
+                playNotificationSound();
+            }, 2200);
         }
 
         function stopAlarmManual() {
@@ -567,7 +690,60 @@
                 alert("Silakan klik tombol 'Aktifkan & Masuk Kasir' terlebih dahulu di awal halaman.");
                 return;
             }
-            startContinuousAlarm();
+            playNotificationSound();
+        }
+
+        // Fungsi Auto-Download Struk / Teks Pesanan dan Bukti Pembayaran ke Komputer Kasir
+        function autoDownloadOrderAssets(order) {
+            try {
+                const itemsArray = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+                let textContent = `=== STRUK PESANAN SITENEXS CAFE ===\n`;
+                textContent += `ID Pesanan : ${order.id}\n`;
+                textContent += `Meja       : ${order.table}\n`;
+                textContent += `Nama Pemesan: ${order.name}\n`;
+                textContent += `Waktu      : ${order.time || '-'}\n`;
+                textContent += `Pembayaran : ${order.paymentMethod || 'Tunai'}\n`;
+                textContent += `------------------------------------\n`;
+                itemsArray.forEach(item => {
+                    textContent += `- ${item.qty}x ${item.name} @ Rp ${item.price.toLocaleString('id-ID')} = Rp ${(item.price * item.qty).toLocaleString('id-ID')}\n`;
+                    if(item.note) textContent += `  Catatan: ${item.note}\n`;
+                });
+                textContent += `------------------------------------\n`;
+                textContent += `TOTAL PEMBAYARAN: Rp ${(order.total || 0).toLocaleString('id-ID')}\n`;
+                textContent += `====================================\n`;
+
+                const blobText = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+                const urlText = URL.createObjectURL(blobText);
+                const aText = document.createElement('a');
+                aText.href = urlText;
+                aText.download = `Struk_Meja_${order.table}_${order.id}.txt`;
+                document.body.appendChild(aText);
+                aText.click();
+                document.body.removeChild(aText);
+                URL.revokeObjectURL(urlText);
+
+                if (order.paymentProof && order.paymentProof.startsWith('data:image')) {
+                    const aImg = document.createElement('a');
+                    aImg.href = order.paymentProof;
+                    aImg.download = `Bukti_Transfer_Meja_${order.table}_${order.id}.png`;
+                    document.body.appendChild(aImg);
+                    aImg.click();
+                    document.body.removeChild(aImg);
+                }
+            } catch (err) {
+                console.error("Gagal melakukan auto-download:", err);
+            }
+        }
+
+        function initCleanupTask() {
+            setInterval(async () => {
+                try {
+                    await _supabase.from('orders').delete().eq('status', 'Selesai');
+                    loadOrders();
+                } catch (e) {
+                    console.error("Gagal membersihkan data lama:", e);
+                }
+            }, 2 * 60 * 60 * 1000);
         }
 
         function setupRealtimeSubscriptions() {
@@ -576,6 +752,9 @@
               .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
                   loadOrders();
                   startContinuousAlarm();
+                  if (payload.new) {
+                      autoDownloadOrderAssets(payload.new);
+                  }
               })
               .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
                   loadOrders();
@@ -604,6 +783,13 @@
             const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
+        }
+
+        function setFilter(status, btnElement) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            btnElement.classList.add('active');
+            renderOrders();
         }
 
         async function loadWaiterCalls() {
@@ -650,7 +836,6 @@
         }
 
         async function loadOrders() {
-            const container = document.getElementById('orders-grid-container');
             const { data, error } = await _supabase.from('orders').select('*').order('time', { ascending: false });
             
             if (error) return;
@@ -663,16 +848,25 @@
             }
             lastOrderCount = ordersList.length;
 
-            const activeOrders = ordersList.filter(o => o.status !== 'Selesai');
-            document.getElementById('active-order-count').innerText = `${activeOrders.length} Pesanan Aktif`;
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('orders-grid-container');
+            
+            let filteredOrders = ordersList;
+            if (currentFilter !== 'semua') {
+                filteredOrders = ordersList.filter(o => o.status === currentFilter);
+            }
+
             container.innerHTML = '';
 
-            if (ordersList.length === 0) {
-                container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada pesanan masuk di database saat ini.</div>`;
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">Tidak ada pesanan untuk kategori ini.</div>`;
                 return;
             }
 
-            ordersList.forEach((order) => {
+            filteredOrders.forEach((order) => {
                 let badgeClass = 'badge-menunggu';
                 if (order.status === 'Diproses') badgeClass = 'badge-diproses';
                 if (order.status === 'Selesai') badgeClass = 'badge-selesai';
@@ -689,7 +883,6 @@
                     `;
                 });
 
-                // Bagian Pratinjau Bukti Transfer jika ada
                 let proofHtml = '';
                 if (order.paymentProof) {
                     proofHtml = `
