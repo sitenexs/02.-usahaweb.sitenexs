@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CDN Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -367,7 +371,7 @@
         <div style="background: white; color: var(--text-main); padding: 2rem; border-radius: 1rem; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
             <i class="fas fa-volume-up" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
             <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Aktifkan Suara Notifikasi</h2>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem;">Klik tombol di bawah ini untuk mengizinkan alarm suara berulang saat pesanan atau panggilan baru masuk.</p>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem;">Klik tombol di bawah ini untuk mengizinkan alarm suara berulang saat pesanan atau panggilan baru masuk dari database.</p>
             <button class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;" onclick="unlockAudio()">Aktifkan & Masuk Kasir</button>
         </div>
     </div>
@@ -396,12 +400,12 @@
                 </button>
                 <div>
                     <h1>Dashboard Kasir & Pelayan Meja</h1>
-                    <p>Terima pesanan masuk real-time dari pelanggan dan kelola status penyajian meja.</p>
+                    <p>Terima pesanan masuk real-time dari database dan kelola status penyajian meja.</p>
                 </div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
                 <button class="btn btn-primary" onclick="testAlarm()"><i class="fas fa-bell"></i> Tes Suara</button>
-                <button class="btn btn-secondary" onclick="loadOrders()"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+                <button class="btn btn-secondary" onclick="loadOrders(); loadWaiterCalls();"><i class="fas fa-sync-alt"></i> Refresh Data</button>
             </div>
         </header>
 
@@ -437,11 +441,21 @@
     </main>
 
     <script>
+        // Konfigurasi Supabase dengan Anon Key yang Valid
+        const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let audioCtx = null;
         let lastOrderCount = -1;
         let lastCallCount = -1;
         let alarmInterval = null;
         let isAlarmActive = false;
+
+        let ordersList = [];
+        let callsList = [];
 
         function unlockAudio() {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -449,9 +463,10 @@
             playSingleBeep(); 
             loadOrders();
             loadWaiterCalls();
+            setupRealtimeSubscriptions();
         }
 
-        // Fungsi Membunyikan 1 Siklus Beep Keras dengan Auto-Resume AudioContext
+        // Fungsi Membunyikan 1 Siklus Beep Keras
         function playSingleBeep() {
             if (!audioCtx) return;
             if (audioCtx.state === 'suspended') {
@@ -483,22 +498,18 @@
             }
         }
 
-        // Memulai Alarm Berulang Terus-menerus
         function startContinuousAlarm() {
-            if (isAlarmActive) return; // Jika sudah berdering, jangan ditimpa interval baru
+            if (isAlarmActive) return; 
             isAlarmActive = true;
             document.getElementById('alarm-banner').style.display = 'flex';
 
-            playSingleBeep(); // Bunyikan pertama kali seketika
-            
-            // Ulangi alarm setiap 2 detik tanpa henti sampai tombol matikan ditekan
+            playSingleBeep();
             if (alarmInterval) clearInterval(alarmInterval);
             alarmInterval = setInterval(() => {
                 playSingleBeep();
             }, 2000);
         }
 
-        // Mematikan Alarm secara Manual
         function stopAlarmManual() {
             if (alarmInterval) {
                 clearInterval(alarmInterval);
@@ -516,13 +527,37 @@
             startContinuousAlarm();
         }
 
+        // Setup Realtime Subscription Supabase untuk tabel 'orders' dan 'calls'
+        function setupRealtimeSubscriptions() {
+            _supabase
+              .channel('public:orders_and_calls')
+              .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
+                  console.log('Pesanan baru masuk:', payload);
+                  loadOrders();
+                  startContinuousAlarm();
+              })
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+                  loadOrders();
+              })
+              .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'calls' }, payload => {
+                  console.log('Panggilan pelayan baru:', payload);
+                  loadWaiterCalls();
+                  startContinuousAlarm();
+              })
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'calls' }, payload => {
+                  loadWaiterCalls();
+              })
+              .subscribe();
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            // Backup polling tiap 5 detik jika real-time terputus
             setInterval(() => {
                 if (audioCtx) {
                     loadOrders();
                     loadWaiterCalls();
                 }
-            }, 2000); // Auto-refresh data tiap 2 detik
+            }, 5000);
         });
 
         function toggleSidebar() {
@@ -532,38 +567,42 @@
             overlay.classList.toggle('show');
         }
 
-        function loadWaiterCalls() {
+        // Ambil Panggilan Pelayan dari Database Supabase
+        async function loadWaiterCalls() {
             const container = document.getElementById('waiter-call-container');
-            const calls = JSON.parse(localStorage.getItem('sitenexs_calls')) || [];
-
-            // Inisialisasi hitungan awal agar tidak berdering saat pertama kali load halaman
-            if (lastCallCount === -1) {
-                lastCallCount = calls.length;
+            const { data, error } = await _supabase.from('calls').select('*').order('id', { ascending: false });
+            
+            if (error) {
+                console.error('Gagal memuat panggilan pelayan:', error);
+                return;
             }
 
-            // Jika ada panggilan baru masuk (jumlah bertambah), nyalakan alarm berulang
-            if (calls.length > lastCallCount) {
+            callsList = data || [];
+
+            if (lastCallCount === -1) {
+                lastCallCount = callsList.length;
+            } else if (callsList.length > lastCallCount) {
                 startContinuousAlarm();
             }
-            lastCallCount = calls.length;
+            lastCallCount = callsList.length;
 
-            if (calls.length === 0) {
+            if (callsList.length === 0) {
                 container.innerHTML = '';
                 return;
             }
 
             container.innerHTML = '';
-            calls.forEach((c, index) => {
+            callsList.forEach((c) => {
                 container.innerHTML += `
                     <div class="call-banner">
                         <div style="display: flex; align-items: center; gap: 0.6rem;">
                             <i class="fas fa-bell fa-shake" style="font-size: 1.2rem; color: #d97706;"></i>
                             <div>
                                 <strong style="font-size: 0.85rem;">Meja ${c.table} Memanggil Pelayan!</strong>
-                                <p style="font-size: 0.7rem; color: #b45309;">Waktu Panggilan: ${c.time}</p>
+                                <p style="font-size: 0.7rem; color: #b45309;">Waktu Panggilan: ${c.time || '-'}</p>
                             </div>
                         </div>
-                        <button class="btn btn-secondary" style="background: #fff; border: 1px solid #fde68a;" onclick="resolveCall(${index})">
+                        <button class="btn btn-secondary" style="background: #fff; border: 1px solid #fde68a;" onclick="resolveCall('${c.id}')">
                             <i class="fas fa-check"></i> Selesaikan
                         </button>
                     </div>
@@ -571,47 +610,53 @@
             });
         }
 
-        function resolveCall(index) {
-            let calls = JSON.parse(localStorage.getItem('sitenexs_calls')) || [];
-            calls.splice(index, 1);
-            localStorage.setItem('sitenexs_calls', JSON.stringify(calls));
-            lastCallCount = calls.length;
-            
-            // Jika semua panggilan & pesanan aktif sudah beres, Anda bisa otomatis mematikan alarm (opsional)
-            // Atau tetap biarkan sampai staf menekan tombol manual sesuai preferensi Anda.
+        async function resolveCall(id) {
+            const { error } = await _supabase.from('calls').delete().eq('id', id);
+            if (error) {
+                alert('Gagal menyelesaikan panggilan: ' + error.message);
+                return;
+            }
             loadWaiterCalls();
         }
 
-        function loadOrders() {
+        // Ambil Daftar Pesanan dari Database Supabase
+        async function loadOrders() {
             const container = document.getElementById('orders-grid-container');
-            const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
+            const { data, error } = await _supabase.from('orders').select('*').order('time', { ascending: false });
             
-            // Inisialisasi hitungan awal
-            if (lastOrderCount === -1) {
-                lastOrderCount = orders.length;
-            }
-
-            // Cek apakah ada pesanan baru masuk (jumlah bertambah)
-            if (orders.length > lastOrderCount) {
-                startContinuousAlarm();
-            }
-            lastOrderCount = orders.length;
-
-            document.getElementById('active-order-count').innerText = `${orders.filter(o => o.status !== 'Selesai').length} Pesanan Aktif`;
-            container.innerHTML = '';
-
-            if (orders.length === 0) {
-                container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada pesanan masuk saat ini.</div>`;
+            if (error) {
+                console.error('Gagal memuat pesanan dari database:', error);
                 return;
             }
 
-            orders.forEach((order) => {
+            ordersList = data || [];
+
+            if (lastOrderCount === -1) {
+                lastOrderCount = ordersList.length;
+            } else if (ordersList.length > lastOrderCount) {
+                startContinuousAlarm();
+            }
+            lastOrderCount = ordersList.length;
+
+            const activeOrders = ordersList.filter(o => o.status !== 'Selesai');
+            document.getElementById('active-order-count').innerText = `${activeOrders.length} Pesanan Aktif`;
+            container.innerHTML = '';
+
+            if (ordersList.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada pesanan masuk di database saat ini.</div>`;
+                return;
+            }
+
+            ordersList.forEach((order) => {
                 let badgeClass = 'badge-menunggu';
                 if (order.status === 'Diproses') badgeClass = 'badge-diproses';
                 if (order.status === 'Selesai') badgeClass = 'badge-selesai';
 
                 let itemsHtml = '';
-                order.items.forEach(item => {
+                // Handle items jika disimpan sebagai JSON array di Supabase
+                const itemsArray = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+                
+                itemsArray.forEach(item => {
                     itemsHtml += `
                         <div class="order-item-row">
                             <span>${item.qty}x ${item.name} ${item.note ? `<br><small style="color:var(--primary)">Catatan: ${item.note}</small>` : ''}</span>
@@ -626,7 +671,7 @@
                             <div class="order-header">
                                 <div>
                                     <h4 style="font-size: 0.9rem; font-weight: 700;">Meja ${order.table} — ${order.name}</h4>
-                                    <span style="font-size: 0.7rem; color: var(--text-muted);">${order.id} • ${order.time}</span>
+                                    <span style="font-size: 0.7rem; color: var(--text-muted);">${order.id} • ${order.time || '-'}</span>
                                 </div>
                                 <span class="badge ${badgeClass}">${order.status}</span>
                             </div>
@@ -636,8 +681,8 @@
                         </div>
                         <div>
                             <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; margin-bottom: 0.75rem;">
-                                <span>Total (${order.paymentMethod}):</span>
-                                <span style="color: var(--primary);">Rp ${order.total.toLocaleString('id-ID')}</span>
+                                <span>Total (${order.paymentMethod || 'Tunai'}):</span>
+                                <span style="color: var(--primary);">Rp ${(order.total || 0).toLocaleString('id-ID')}</span>
                             </div>
                             <div style="display: flex; gap: 0.4rem;">
                                 ${order.status === 'Menunggu' ? `<button class="btn btn-primary" style="flex:1;" onclick="updateOrderStatus('${order.id}', 'Diproses')"><i class="fas fa-fire"></i> Proses</button>` : ''}
@@ -651,22 +696,30 @@
             });
         }
 
-        function updateOrderStatus(id, newStatus) {
-            let orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
-            const order = orders.find(o => o.id === id);
-            if (order) {
-                order.status = newStatus;
-                localStorage.setItem('sitenexs_orders', JSON.stringify(orders));
-                loadOrders();
+        async function updateOrderStatus(id, newStatus) {
+            const { error } = await _supabase
+                .from('orders')
+                .update({ status: newStatus })
+                .eq('id', id);
+
+            if (error) {
+                alert('Gagal memperbarui status pesanan: ' + error.message);
+                return;
             }
+            loadOrders();
         }
 
-        function deleteOrder(id) {
-            if (confirm('Hapus riwayat pesanan ini?')) {
-                let orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
-                orders = orders.filter(o => o.id !== id);
-                localStorage.setItem('sitenexs_orders', JSON.stringify(orders));
-                lastOrderCount = orders.length;
+        async function deleteOrder(id) {
+            if (confirm('Hapus riwayat pesanan ini dari database?')) {
+                const { error } = await _supabase
+                    .from('orders')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert('Gagal menghapus pesanan: ' + error.message);
+                    return;
+                }
                 loadOrders();
             }
         }
