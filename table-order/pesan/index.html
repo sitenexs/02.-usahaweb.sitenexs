@@ -400,7 +400,7 @@
             background: #ffffff;
             width: 100%;
             max-width: 500px;
-            max-height: 80vh;
+            max-height: 85vh;
             border-radius: var(--radius-md) var(--radius-md) 0 0;
             padding: 1rem;
             overflow-y: auto;
@@ -412,22 +412,22 @@
             transform: translateY(0);
         }
 
-        /* Modifikasi Preview Gambar Sesuai Ukuran Asli (Object-Fit: Contain) */
         .preview-img-container {
             width: 100%;
-            height: 220px;
-            background: #0f172a;
+            height: 160px;
+            background: #f1f5f9;
             border-radius: var(--radius-sm);
             margin-bottom: 0.6rem;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            border: 1px solid var(--border-subtle);
         }
 
-        #detail-img {
-            max-width: 100%;
-            max-height: 100%;
+        #detail-img, #confirm-img {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
             display: block;
         }
@@ -485,6 +485,17 @@
             color: var(--text-muted);
             animation: fadeIn 0.3s ease;
         }
+
+        .qr-img {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            margin: 0.4rem auto;
+            display: block;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: #fff;
+        }
         
         /* Live Status Tracker */
         .tracker-box {
@@ -525,11 +536,11 @@
         <div class="order-meta-box">
             <div>
                 <span><i class="fas fa-chair"></i>Nomor Meja...</span>
-                <input type="number" id="table-number" value="" placeholder="No..." min="" onchange="saveMeta()">
+                <input type="number" id="table-number" value="" placeholder="No..." min="" onchange="syncMeta('table')">
             </div>
             <div>
                 <span><i class="fas fa-user"></i> Nama</span>
-                <input type="text" id="customer-name" placeholder="Nama..." oninput="saveMeta()">
+                <input type="text" id="customer-name" placeholder="Nama..." oninput="syncMeta('name')">
             </div>
         </div>
 
@@ -567,7 +578,7 @@
             <div style="display: flex; justify-content: flex-end; margin-bottom: 0.2rem;">
                 <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
-            <div class="preview-img-container">
+            <div class="preview-img-container" style="height: 180px;">
                 <img id="detail-img" src="" alt="">
             </div>
             <h3 id="detail-title" style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem;"></h3>
@@ -579,12 +590,31 @@
         </div>
     </div>
 
-    <!-- Modal Konfirmasi Tambah Menu & Catatan -->
+    <!-- Modal Konfirmasi Tambah Menu, Gambar, Qty (+/-) & Catatan -->
     <div class="modal" id="confirm-modal">
-        <div class="modal-content" style="max-width: 340px; margin: auto; border-radius: var(--radius-md);">
-            <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; text-align: center;">Konfirmasi Pesanan</h3>
-            <p id="confirm-item-name" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem; text-align: center;"></p>
+        <div class="modal-content" style="max-width: 360px; margin: auto; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <h3 style="font-size: 0.95rem; font-weight: 700;">Atur Jumlah Pesanan</h3>
+                <button onclick="closeConfirmModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
             
+            <div class="preview-img-container" style="height: 150px;">
+                <img id="confirm-img" src="" alt="">
+            </div>
+            
+            <h4 id="confirm-item-name" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.1rem;"></h4>
+            <div id="confirm-item-price" style="font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-bottom: 0.75rem;"></div>
+
+            <!-- Kontrol Tambah Kurang Qty -->
+            <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-body); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 0.75rem;">
+                <span style="font-size: 0.75rem; font-weight: 600;">Jumlah Porsi:</span>
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; width: auto;" onclick="adjustPromptQty(-1)"><i class="fas fa-minus"></i></button>
+                    <span id="prompt-qty" style="font-weight: 700; font-size: 0.9rem; width: 20px; text-align: center;">1</span>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; width: auto;" onclick="adjustPromptQty(1)"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+
             <div style="margin-bottom: 1rem;">
                 <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.2rem;">Catatan Khusus (Opsional):</label>
                 <input type="text" id="item-note" placeholder="Misal: Pedas sedang, tanpa es" style="width: 100%; padding: 0.4rem 0.5rem; font-size: 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); outline: none;">
@@ -592,7 +622,7 @@
 
             <div style="display: flex; gap: 0.5rem;">
                 <button class="btn btn-secondary" onclick="closeConfirmModal()" style="font-size: 0.75rem;">Batal</button>
-                <button class="btn btn-primary" id="btn-confirm-yes" style="font-size: 0.75rem;">Tambahkan</button>
+                <button class="btn btn-primary" id="btn-confirm-yes" style="font-size: 0.75rem;">Tambahkan ke Pesanan</button>
             </div>
         </div>
     </div>
@@ -604,7 +634,20 @@
                 <h3 style="font-size: 1rem; font-weight: 700;">Detail Pesanan Meja</h3>
                 <button onclick="closeCartModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
-            <div id="cart-items-container" style="margin-bottom: 0.75rem; max-height: 160px; overflow-y: auto;">
+
+            <!-- Input Meja & Nama Tambahan di dalam Modal (jika masih kosong) -->
+            <div style="background: var(--primary-light); border: 1px dashed var(--primary); padding: 0.5rem; border-radius: var(--radius-sm); display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 0.75rem;">
+                <div>
+                    <label style="font-size: 0.65rem; color: var(--text-muted); display: block; margin-bottom: 2px;"><i class="fas fa-chair"></i> Nomor Meja</label>
+                    <input type="number" id="modal-table-number" placeholder="No..." style="width: 100%; padding: 0.3rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 700; color: var(--primary); font-size: 0.75rem; outline: none; background: #fff;" oninput="syncMeta('modal-table')">
+                </div>
+                <div>
+                    <label style="font-size: 0.65rem; color: var(--text-muted); display: block; margin-bottom: 2px;"><i class="fas fa-user"></i> Nama Tamu</label>
+                    <input type="text" id="modal-customer-name" placeholder="Nama..." style="width: 100%; padding: 0.3rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 600; font-size: 0.75rem; outline: none; background: #fff;" oninput="syncMeta('modal-name')">
+                </div>
+            </div>
+
+            <div id="cart-items-container" style="margin-bottom: 0.75rem; max-height: 140px; overflow-y: auto;">
                 <!-- List keranjang -->
             </div>
             
@@ -625,15 +668,29 @@
                     </label>
                 </div>
 
+                <!-- QRIS Dinamis dari Admin -->
                 <div id="pay-qris" class="payment-detail-box">
-                    <i class="fas fa-qrcode" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 3px;"></i>
-                    <p style="font-size: 0.7rem;">Scan QRIS di atas menggunakan e-Wallet atau M-Banking Anda.</p>
+                    <img id="dynamic-qris-img" src="QR.png" alt="QRIS Code" class="qr-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/140?text=QRIS+Tidak+Tersedia';">
+                    <p style="font-size: 0.7rem; margin-top: 4px;">Scan QRIS di atas menggunakan e-Wallet atau M-Banking Anda.</p>
                 </div>
+                <!-- Bank Transfer Dinamis dari Admin -->
                 <div id="pay-bank" class="payment-detail-box">
-                    <p style="font-size: 0.7rem;"><b>BCA:</b> 1234-5678-90 a.n Sitenexs Cafe<br><b>Mandiri:</b> 0987-6543-21 a.n Sitenexs Cafe</p>
+                    <p id="dynamic-bank-info" style="font-size: 0.7rem;">Memuat informasi rekening...</p>
                 </div>
                 <div id="pay-kasir" class="payment-detail-box">
                     <p style="font-size: 0.7rem;">Silakan lakukan pembayaran langsung ke Kasir setelah pesanan selesai.</p>
+                </div>
+            </div>
+
+            <!-- Upload Bukti Pembayaran Wajib -->
+            <div id="payment-proof-section" style="margin-bottom: 0.75rem; background: var(--bg-body); padding: 0.6rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle); display: none;">
+                <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.3rem;">
+                    <i class="fas fa-upload text-primary"></i> Unggah Bukti Pembayaran <span style="color:var(--danger)">*Wajib</span>
+                </label>
+                <input type="file" id="proof-file-input" accept="image/*" onchange="handleProofUpload(event)" style="font-size: 0.7rem; width: 100%;">
+                <div id="proof-preview-container" style="margin-top: 0.4rem; display: none; text-align: center;">
+                    <img id="proof-preview-img" src="" alt="Bukti Transfer" style="max-height: 100px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                    <p style="font-size: 0.65rem; color: var(--success); margin-top: 2px;"><i class="fas fa-check-circle"></i> Bukti berhasil dilampirkan</p>
                 </div>
             </div>
 
@@ -648,7 +705,6 @@
     </div>
 
     <script>
-        // Konfigurasi Supabase dengan Anon Key yang Valid
         const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
 
@@ -658,10 +714,11 @@
         let products = [];
         let cart = [];
         let selectedPaymentMethod = '';
+        let uploadedPaymentProofBase64 = ''; 
         let currentFilter = 'all';
         let activeOrderId = localStorage.getItem('sitenexs_active_order_id') || null;
+        let currentPromptQty = 1;
 
-        // Custom Toast Notification System
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -682,7 +739,6 @@
             }, 3000);
         }
 
-        // Ambil Data Produk dari Supabase
         async function fetchMenuProducts() {
             const { data, error } = await _supabase.from('products').select('*');
             if (error) {
@@ -694,45 +750,67 @@
             renderMenu(currentFilter);
         }
 
-        // Helper Validasi Ukuran File Upload Maksimal 50MB
-        function validateImageFileSize(file) {
-            const MAX_SIZE_MB = 50;
-            const maxSizeInBytes = MAX_SIZE_MB * 1024 * 1024;
-            if (file && file.size > maxSizeInBytes) {
-                showToast(`Ukuran file terlalu besar! Maksimal upload foto adalah ${MAX_SIZE_MB}MB.`, 'error');
-                return false;
+        // Ambil Pengaturan Pembayaran (QRIS & Bank) dari Database
+        async function fetchPaymentSettings() {
+            const { data, error } = await _supabase.from('settings').select('*');
+            if (!error && data) {
+                data.forEach(item => {
+                    if (item.key === 'qris_img' && item.value) {
+                        document.getElementById('dynamic-qris-img').src = item.value;
+                    }
+                    if (item.key === 'bank_info' && item.value) {
+                        document.getElementById('dynamic-bank-info').innerHTML = item.value.replace(/\n/g, '<br>');
+                    }
+                });
             }
-            return true;
         }
 
-        // Load Saved Meta Meja & Nama
         window.addEventListener('DOMContentLoaded', () => {
             const savedTable = localStorage.getItem('sitenexs_table');
             const savedName = localStorage.getItem('sitenexs_name');
-            if (savedTable) document.getElementById('table-number').value = savedTable;
-            if (savedName) document.getElementById('customer-name').value = savedName;
+            if (savedTable) {
+                document.getElementById('table-number').value = savedTable;
+                document.getElementById('modal-table-number').value = savedTable;
+            }
+            if (savedName) {
+                document.getElementById('customer-name').value = savedName;
+                document.getElementById('modal-customer-name').value = savedName;
+            }
 
             if (activeOrderId) {
                 checkOrderStatus();
                 setInterval(checkOrderStatus, 3000); 
             }
 
-            // Ambil data pertama kali
             fetchMenuProducts();
+            fetchPaymentSettings(); // Ambil data QRIS & Bank dari admin
 
-            // Realtime listener jika admin mengubah produk
             _supabase
               .channel('public:products')
               .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
-                  console.log('Perubahan menu terdeteksi:', payload);
                   fetchMenuProducts();
               })
               .subscribe();
         });
 
-        function saveMeta() {
-            localStorage.setItem('sitenexs_table', document.getElementById('table-number').value);
-            localStorage.setItem('sitenexs_name', document.getElementById('customer-name').value);
+        function syncMeta(source) {
+            let tableVal = '';
+            let nameVal = '';
+
+            if (source === 'table' || source === 'name') {
+                tableVal = document.getElementById('table-number').value;
+                nameVal = document.getElementById('customer-name').value;
+                document.getElementById('modal-table-number').value = tableVal;
+                document.getElementById('modal-customer-name').value = nameVal;
+            } else {
+                tableVal = document.getElementById('modal-table-number').value;
+                nameVal = document.getElementById('modal-customer-name').value;
+                document.getElementById('table-number').value = tableVal;
+                document.getElementById('customer-name').value = nameVal;
+            }
+
+            localStorage.setItem('sitenexs_table', tableVal);
+            localStorage.setItem('sitenexs_name', nameVal);
         }
 
         function renderMenu(category = 'all') {
@@ -754,7 +832,6 @@
                 container.innerHTML += `
                     <div class="menu-card">
                         <div class="menu-clickable" onclick="openDetailModal(${p.id})">
-                            <!-- p.img langsung merender Public URL dari Supabase Storage -->
                             <img src="${p.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80'}" class="menu-img" alt="${p.name}">
                             <div class="menu-body">
                                 <div class="menu-title">${p.name}</div>
@@ -812,31 +889,42 @@
         function promptAddToCart(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
-            document.getElementById('confirm-item-name').innerText = `Tambahkan "${product.name}" (Rp ${product.price.toLocaleString('id-ID')})`;
+
+            currentPromptQty = 1;
+            document.getElementById('prompt-qty').innerText = currentPromptQty;
+            document.getElementById('confirm-img').src = product.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80';
+            document.getElementById('confirm-item-name').innerText = product.name;
+            document.getElementById('confirm-item-price').innerText = 'Rp ' + product.price.toLocaleString('id-ID');
             document.getElementById('item-note').value = '';
 
             document.getElementById('btn-confirm-yes').onclick = function() {
                 const note = document.getElementById('item-note').value;
-                addToCart(id, note);
+                addToCartWithQty(id, currentPromptQty, note);
                 closeConfirmModal();
             };
             openModal('confirm-modal');
+        }
+
+        function adjustPromptQty(change) {
+            currentPromptQty += change;
+            if (currentPromptQty < 1) currentPromptQty = 1;
+            document.getElementById('prompt-qty').innerText = currentPromptQty;
         }
 
         function closeConfirmModal() {
             closeModal('confirm-modal');
         }
 
-        function addToCart(id, note) {
+        function addToCartWithQty(id, qty, note) {
             const product = products.find(p => p.id === id);
             const existing = cart.find(item => item.id === id && item.note === note);
             if (existing) {
-                existing.qty++;
+                existing.qty += qty;
             } else {
-                cart.push({ ...product, qty: 1, note: note });
+                cart.push({ ...product, qty: qty, note: note });
             }
             updateCartBar();
-            showToast(`Berhasil menambahkan ${product.name} ke pesanan.`, 'success');
+            showToast(`Berhasil menambahkan ${qty}x ${product.name} ke pesanan.`, 'success');
         }
 
         function updateCartQty(index, change) {
@@ -864,6 +952,11 @@
         }
 
         function openCartModal() {
+            const currentTable = localStorage.getItem('sitenexs_table') || '';
+            const currentName = localStorage.getItem('sitenexs_name') || '';
+            document.getElementById('modal-table-number').value = currentTable;
+            document.getElementById('modal-customer-name').value = currentName;
+
             const container = document.getElementById('cart-items-container');
             container.innerHTML = '';
             let totalPrice = 0;
@@ -910,24 +1003,45 @@
             if (method === 'qris') document.getElementById('pay-qris').style.display = 'block';
             if (method === 'bank') document.getElementById('pay-bank').style.display = 'block';
             if (method === 'kasir') document.getElementById('pay-kasir').style.display = 'block';
+
+            const proofSection = document.getElementById('payment-proof-section');
+            proofSection.style.display = 'block';
         }
 
-        // Kirim Pesanan ke Supabase
+        function handleProofUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedPaymentProofBase64 = e.target.result;
+                document.getElementById('proof-preview-img').src = uploadedPaymentProofBase64;
+                document.getElementById('proof-preview-container').style.display = 'block';
+                showToast('Bukti pembayaran berhasil dilampirkan.', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function checkoutOrder() {
-            const tableNumber = document.getElementById('table-number').value;
-            const customerName = document.getElementById('customer-name').value.trim();
+            const tableNumber = document.getElementById('modal-table-number').value || document.getElementById('table-number').value;
+            const customerName = (document.getElementById('modal-customer-name').value || document.getElementById('customer-name').value).trim();
             
             if (!tableNumber) {
                 showToast('Mohon isi nomor meja Anda terlebih dahulu!', 'warning');
+                document.getElementById('modal-table-number').focus();
                 return;
             }
             if (!customerName) {
                 showToast('Mohon isi nama tamu terlebih dahulu!', 'warning');
-                document.getElementById('customer-name').focus();
+                document.getElementById('modal-customer-name').focus();
                 return;
             }
             if (!selectedPaymentMethod) {
                 showToast('Silakan pilih metode pembayaran terlebih dahulu!', 'warning');
+                return;
+            }
+            if (!uploadedPaymentProofBase64) {
+                showToast('Anda wajib mengunggah bukti pembayaran terlebih dahulu!', 'error');
                 return;
             }
             if (cart.length === 0) return;
@@ -944,6 +1058,7 @@
                 items: cart,
                 total: cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
                 paymentMethod: selectedPaymentMethod,
+                paymentProof: uploadedPaymentProofBase64, 
                 time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
                 status: 'Menunggu'
             };
@@ -951,20 +1066,22 @@
             const { error } = await _supabase.from('orders').insert([orderPayload]);
             
             if (error) {
-                console.warn('Gagal menyimpan ke tabel Supabase orders, mencadangkan ke localStorage:', error);
-                const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
-                orders.unshift(orderPayload);
-                localStorage.setItem('sitenexs_orders', JSON.stringify(orders));
+                console.warn('Gagal menyimpan ke tabel Supabase orders:', error);
+                showToast('Gagal mengirim pesanan ke server.', 'error');
+                btnCheckout.disabled = false;
+                btnCheckout.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
+                return;
             }
 
             localStorage.setItem('sitenexs_active_order_id', orderIdFormatted);
             activeOrderId = orderIdFormatted;
 
             showActiveTracker(orderIdFormatted, 'Menunggu');
-            showToast(`Pesanan berhasil dikirim! Pembayaran via ${selectedPaymentMethod.toUpperCase()}.`, 'success');
+            showToast(`Pesanan berhasil dikirim dengan bukti pembayaran!`, 'success');
             
             cart = [];
             selectedPaymentMethod = '';
+            uploadedPaymentProofBase64 = '';
             updateCartBar();
             closeCartModal();
 
@@ -985,13 +1102,7 @@
                 status: 'Pending'
             };
 
-            const { error } = await _supabase.from('calls').insert([callData]);
-            if (error) {
-                const calls = JSON.parse(localStorage.getItem('sitenexs_calls')) || [];
-                calls.unshift(callData);
-                localStorage.setItem('sitenexs_calls', JSON.stringify(calls));
-            }
-
+            await _supabase.from('calls').insert([callData]);
             showToast(`Pelayan telah dipanggil ke Meja ${tableNumber}. Mohon tunggu sebentar.`, 'warning');
         }
 
@@ -1009,7 +1120,7 @@
         async function checkOrderStatus() {
             if (!activeOrderId) return;
             
-            const { data, error } = await _supabase
+            const { data } = await _supabase
                 .from('orders')
                 .select('*')
                 .eq('id', activeOrderId)
@@ -1017,12 +1128,6 @@
 
             if (data) {
                 showActiveTracker(data.id, data.status);
-            } else {
-                const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
-                const currentOrder = orders.find(o => o.id === activeOrderId);
-                if (currentOrder) {
-                    showActiveTracker(currentOrder.id, currentOrder.status);
-                }
             }
         }
 
