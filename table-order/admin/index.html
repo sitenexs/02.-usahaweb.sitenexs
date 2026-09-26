@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CDN Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -584,19 +588,30 @@
     </div>
 
     <script>
-        const defaultProducts = [
-            { id: 1, name: "Nasi Goreng Spesial", price: 25000, category: "makanan", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&auto=format&fit=crop&q=80", desc: "Nasi goreng gurih dengan tambahan telur mata sapi, suwiran ayam pilihan, dan kerupuk renyah." },
-            { id: 2, name: "Mie Ayam Bakso", price: 18000, category: "makanan", img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&auto=format&fit=crop&q=80", desc: "Mie kenyal berpadu dengan topping ayam gurih serta bakso sapi homemade yang lezat." },
-            { id: 3, name: "Es Teh Manis", price: 5000, category: "minuman", img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300&auto=format&fit=crop&q=80", desc: "Teh pilihan berkualitas disajikan dingin dengan es batu segar yang menyegarkan hari Anda." },
-            { id: 4, name: "Jus Alpukat", price: 12000, category: "minuman", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=300&auto=format&fit=crop&q=80", desc: "Jus buah alpukat segar kental dengan tambahan susu kental manis cokelat yang nikmat." },
-            { id: 5, name: "Kentang Goreng", price: 15000, category: "snack", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&auto=format&fit=crop&q=80", desc: "Kentang pilihan digoreng renyah dengan taburan bumbu gurih dan saus sambal." }
-        ];
+        // Konfigurasi Supabase dengan Anon Key yang Valid
+        const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
 
-        let products = JSON.parse(localStorage.getItem('sitenexs_products')) || defaultProducts;
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        window.addEventListener('DOMContentLoaded', () => {
+        let products = [];
+
+        // 1. Ambil Data dari Supabase saat halaman dimuat
+        async function fetchProducts() {
+            const { data, error } = await _supabase.from('products').select('*');
+            if (error) {
+                console.error('Gagal memuat produk dari Supabase:', error);
+                alert('Gagal terhubung ke database: ' + error.message);
+                return;
+            }
+            products = data || [];
             renderAdminProducts();
             updateStats();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchProducts();
         });
 
         function toggleSidebar() {
@@ -624,7 +639,7 @@
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted); white-space: normal;">
                             <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; color: #cbd5e1;"></i>
-                            Tidak ada produk atau menu yang ditemukan.
+                            Tidak ada produk atau menu yang ditemukan di database.
                         </td>
                     </tr>`;
                 return;
@@ -705,7 +720,8 @@
             }
         }
 
-        function saveProduct(e) {
+        // 2. Simpan atau Perbarui Produk ke Supabase
+        async function saveProduct(e) {
             e.preventDefault();
             const id = document.getElementById('product-id').value;
             const name = document.getElementById('product-name').value;
@@ -720,27 +736,45 @@
             }
 
             if (id) {
-                const index = products.findIndex(p => p.id == id);
-                if (index !== -1) {
-                    products[index] = { id: parseInt(id), name, category, price, img, desc };
+                // Update data yang ada
+                const { error } = await _supabase
+                    .from('products')
+                    .update({ name, category, price, img, desc })
+                    .eq('id', parseInt(id));
+
+                if (error) {
+                    alert('Gagal memperbarui produk: ' + error.message);
+                    return;
                 }
             } else {
-                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-                products.push({ id: newId, name, category, price, img, desc });
+                // Tambah data baru
+                const { error } = await _supabase
+                    .from('products')
+                    .insert([{ name, category, price, img, desc }]);
+
+                if (error) {
+                    alert('Gagal menambah produk baru: ' + error.message);
+                    return;
+                }
             }
 
-            localStorage.setItem('sitenexs_products', JSON.stringify(products));
-            renderAdminProducts();
-            updateStats();
+            fetchProducts(); // Refresh data dari server
             closeProductModal();
         }
 
-        function deleteProduct(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus produk ini dari daftar menu?')) {
-                products = products.filter(p => p.id !== id);
-                localStorage.setItem('sitenexs_products', JSON.stringify(products));
-                renderAdminProducts();
-                updateStats();
+        // 3. Hapus Produk dari Supabase
+        async function deleteProduct(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus produk ini dari database?')) {
+                const { error } = await _supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert('Gagal menghapus produk: ' + error.message);
+                } else {
+                    fetchProducts(); // Refresh data dari server
+                }
             }
         }
     </script>
