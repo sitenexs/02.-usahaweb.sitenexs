@@ -412,6 +412,26 @@
             transform: translateY(0);
         }
 
+        /* Modifikasi Preview Gambar Sesuai Ukuran Asli (Object-Fit: Contain) */
+        .preview-img-container {
+            width: 100%;
+            height: 220px;
+            background: #0f172a;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #detail-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
         .cart-item-row {
             display: flex;
             justify-content: space-between;
@@ -547,7 +567,9 @@
             <div style="display: flex; justify-content: flex-end; margin-bottom: 0.2rem;">
                 <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
-            <img id="detail-img" src="" alt="" style="width: 100%; height: 140px; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: 0.6rem;">
+            <div class="preview-img-container">
+                <img id="detail-img" src="" alt="">
+            </div>
             <h3 id="detail-title" style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem;"></h3>
             <div id="detail-price" style="font-size: 0.85rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;"></div>
             <p id="detail-desc" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4;"></p>
@@ -672,6 +694,17 @@
             renderMenu(currentFilter);
         }
 
+        // Helper Validasi Ukuran File Upload Maksimal 50MB
+        function validateImageFileSize(file) {
+            const MAX_SIZE_MB = 50;
+            const maxSizeInBytes = MAX_SIZE_MB * 1024 * 1024;
+            if (file && file.size > maxSizeInBytes) {
+                showToast(`Ukuran file terlalu besar! Maksimal upload foto adalah ${MAX_SIZE_MB}MB.`, 'error');
+                return false;
+            }
+            return true;
+        }
+
         // Load Saved Meta Meja & Nama
         window.addEventListener('DOMContentLoaded', () => {
             const savedTable = localStorage.getItem('sitenexs_table');
@@ -721,6 +754,7 @@
                 container.innerHTML += `
                     <div class="menu-card">
                         <div class="menu-clickable" onclick="openDetailModal(${p.id})">
+                            <!-- p.img langsung merender Public URL dari Supabase Storage -->
                             <img src="${p.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80'}" class="menu-img" alt="${p.name}">
                             <div class="menu-body">
                                 <div class="menu-title">${p.name}</div>
@@ -759,7 +793,7 @@
         function openDetailModal(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
-            document.getElementById('detail-img').src = product.img;
+            document.getElementById('detail-img').src = product.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80';
             document.getElementById('detail-title').innerText = product.name;
             document.getElementById('detail-price').innerText = 'Rp ' + product.price.toLocaleString('id-ID');
             document.getElementById('detail-desc').innerText = product.desc || 'Menu lezat pilihan terbaik dari Sitenexs Cafe & Resto.';
@@ -878,7 +912,7 @@
             if (method === 'kasir') document.getElementById('pay-kasir').style.display = 'block';
         }
 
-        // Kirim Pesanan ke Supabase (Tabel 'orders' atau fallback ke localStorage jika tabel belum dibuat)
+        // Kirim Pesanan ke Supabase
         async function checkoutOrder() {
             const tableNumber = document.getElementById('table-number').value;
             const customerName = document.getElementById('customer-name').value.trim();
@@ -914,12 +948,10 @@
                 status: 'Menunggu'
             };
 
-            // Simpan ke Supabase tabel 'orders'
             const { error } = await _supabase.from('orders').insert([orderPayload]);
             
             if (error) {
                 console.warn('Gagal menyimpan ke tabel Supabase orders, mencadangkan ke localStorage:', error);
-                // Cadangan localStorage agar aplikasi tetap berjalan jika tabel orders belum dibuat di Supabase
                 const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
                 orders.unshift(orderPayload);
                 localStorage.setItem('sitenexs_orders', JSON.stringify(orders));
@@ -986,7 +1018,6 @@
             if (data) {
                 showActiveTracker(data.id, data.status);
             } else {
-                // Fallback cek localStorage
                 const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
                 const currentOrder = orders.find(o => o.id === activeOrderId);
                 if (currentOrder) {
