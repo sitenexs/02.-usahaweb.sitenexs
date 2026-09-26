@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CDN Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -622,15 +626,14 @@
     </div>
 
     <script>
-        const defaultProducts = [
-            { id: 1, name: "Nasi Goreng Spesial", price: 25000, category: "makanan", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&auto=format&fit=crop&q=80", desc: "Nasi goreng gurih dengan tambahan telur mata sapi, suwiran ayam pilihan, dan kerupuk renyah." },
-            { id: 2, name: "Mie Ayam Bakso", price: 18000, category: "makanan", img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&auto=format&fit=crop&q=80", desc: "Mie kenyal berpadu dengan topping ayam gurih serta bakso sapi homemade yang lezat." },
-            { id: 3, name: "Es Teh Manis", price: 5000, category: "minuman", img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300&auto=format&fit=crop&q=80", desc: "Teh pilihan berkualitas disajikan dingin dengan es batu segar yang menyegarkan hari Anda." },
-            { id: 4, name: "Jus Alpukat", price: 12000, category: "minuman", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=300&auto=format&fit=crop&q=80", desc: "Jus buah alpukat segar kental dengan tambahan susu kental manis cokelat yang nikmat." },
-            { id: 5, name: "Kentang Goreng", price: 15000, category: "snack", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&auto=format&fit=crop&q=80", desc: "Kentang pilihan digoreng renyah dengan taburan bumbu gurih dan saus sambal." }
-        ];
+        // Konfigurasi Supabase dengan Anon Key yang Valid
+        const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
 
-        let products = JSON.parse(localStorage.getItem('sitenexs_products')) || defaultProducts;
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let products = [];
         let cart = [];
         let selectedPaymentMethod = '';
         let currentFilter = 'all';
@@ -657,6 +660,18 @@
             }, 3000);
         }
 
+        // Ambil Data Produk dari Supabase
+        async function fetchMenuProducts() {
+            const { data, error } = await _supabase.from('products').select('*');
+            if (error) {
+                console.error('Gagal memuat menu dari Supabase:', error);
+                showToast('Gagal memuat menu dari server.', 'error');
+                return;
+            }
+            products = data || [];
+            renderMenu(currentFilter);
+        }
+
         // Load Saved Meta Meja & Nama
         window.addEventListener('DOMContentLoaded', () => {
             const savedTable = localStorage.getItem('sitenexs_table');
@@ -666,9 +681,20 @@
 
             if (activeOrderId) {
                 checkOrderStatus();
-                setInterval(checkOrderStatus, 2000); // Cek status otomatis tiap 2 detik
+                setInterval(checkOrderStatus, 3000); 
             }
-            renderMenu();
+
+            // Ambil data pertama kali
+            fetchMenuProducts();
+
+            // Realtime listener jika admin mengubah produk
+            _supabase
+              .channel('public:products')
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
+                  console.log('Perubahan menu terdeteksi:', payload);
+                  fetchMenuProducts();
+              })
+              .subscribe();
         });
 
         function saveMeta() {
@@ -682,6 +708,15 @@
             
             const filtered = category === 'all' ? products : products.filter(p => p.category === category);
             
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: span 2; text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-box-open" style="font-size: 1.5rem; margin-bottom: 0.4rem; display: block;"></i>
+                        Belum ada menu pada kategori ini.
+                    </div>`;
+                return;
+            }
+
             filtered.forEach(p => {
                 container.innerHTML += `
                     <div class="menu-card">
@@ -723,6 +758,7 @@
 
         function openDetailModal(id) {
             const product = products.find(p => p.id === id);
+            if (!product) return;
             document.getElementById('detail-img').src = product.img;
             document.getElementById('detail-title').innerText = product.name;
             document.getElementById('detail-price').innerText = 'Rp ' + product.price.toLocaleString('id-ID');
@@ -741,6 +777,7 @@
 
         function promptAddToCart(id) {
             const product = products.find(p => p.id === id);
+            if (!product) return;
             document.getElementById('confirm-item-name').innerText = `Tambahkan "${product.name}" (Rp ${product.price.toLocaleString('id-ID')})`;
             document.getElementById('item-note').value = '';
 
@@ -841,7 +878,8 @@
             if (method === 'kasir') document.getElementById('pay-kasir').style.display = 'block';
         }
 
-        function checkoutOrder() {
+        // Kirim Pesanan ke Supabase (Tabel 'orders' atau fallback ke localStorage jika tabel belum dibuat)
+        async function checkoutOrder() {
             const tableNumber = document.getElementById('table-number').value;
             const customerName = document.getElementById('customer-name').value.trim();
             
@@ -860,33 +898,39 @@
             }
             if (cart.length === 0) return;
 
-            // Cegah double-click
             const btnCheckout = document.getElementById('btn-checkout');
             btnCheckout.disabled = true;
             btnCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
 
-            const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
-            const newOrder = {
-                id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+            const orderIdFormatted = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+            const orderPayload = {
+                id: orderIdFormatted,
                 table: tableNumber,
                 name: customerName,
-                items: [...cart],
+                items: cart,
                 total: cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
                 paymentMethod: selectedPaymentMethod,
                 time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
                 status: 'Menunggu'
             };
 
-            orders.unshift(newOrder);
-            localStorage.setItem('sitenexs_orders', JSON.stringify(orders));
-            localStorage.setItem('sitenexs_active_order_id', newOrder.id);
-            activeOrderId = newOrder.id;
+            // Simpan ke Supabase tabel 'orders'
+            const { error } = await _supabase.from('orders').insert([orderPayload]);
+            
+            if (error) {
+                console.warn('Gagal menyimpan ke tabel Supabase orders, mencadangkan ke localStorage:', error);
+                // Cadangan localStorage agar aplikasi tetap berjalan jika tabel orders belum dibuat di Supabase
+                const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
+                orders.unshift(orderPayload);
+                localStorage.setItem('sitenexs_orders', JSON.stringify(orders));
+            }
 
-            showActiveTracker(newOrder.id, 'Menunggu');
+            localStorage.setItem('sitenexs_active_order_id', orderIdFormatted);
+            activeOrderId = orderIdFormatted;
 
+            showActiveTracker(orderIdFormatted, 'Menunggu');
             showToast(`Pesanan berhasil dikirim! Pembayaran via ${selectedPaymentMethod.toUpperCase()}.`, 'success');
             
-            // Reset keranjang
             cart = [];
             selectedPaymentMethod = '';
             updateCartBar();
@@ -896,15 +940,26 @@
             btnCheckout.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
         }
 
-        function callWaiter() {
+        async function callWaiter() {
             const tableNumber = document.getElementById('table-number').value;
             if (!tableNumber) {
                 showToast('Mohon isi nomor meja Anda sebelum memanggil pelayan!', 'warning');
                 return;
             }
-            const calls = JSON.parse(localStorage.getItem('sitenexs_calls')) || [];
-            calls.unshift({ table: tableNumber, time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) });
-            localStorage.setItem('sitenexs_calls', JSON.stringify(calls));
+            
+            const callData = { 
+                table: tableNumber, 
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                status: 'Pending'
+            };
+
+            const { error } = await _supabase.from('calls').insert([callData]);
+            if (error) {
+                const calls = JSON.parse(localStorage.getItem('sitenexs_calls')) || [];
+                calls.unshift(callData);
+                localStorage.setItem('sitenexs_calls', JSON.stringify(calls));
+            }
+
             showToast(`Pelayan telah dipanggil ke Meja ${tableNumber}. Mohon tunggu sebentar.`, 'warning');
         }
 
@@ -919,13 +974,24 @@
             document.getElementById('tracker-bar').style.width = progressWidth;
         }
 
-        function checkOrderStatus() {
+        async function checkOrderStatus() {
             if (!activeOrderId) return;
-            const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
-            const currentOrder = orders.find(o => o.id === activeOrderId);
+            
+            const { data, error } = await _supabase
+                .from('orders')
+                .select('*')
+                .eq('id', activeOrderId)
+                .single();
 
-            if (currentOrder) {
-                showActiveTracker(currentOrder.id, currentOrder.status);
+            if (data) {
+                showActiveTracker(data.id, data.status);
+            } else {
+                // Fallback cek localStorage
+                const orders = JSON.parse(localStorage.getItem('sitenexs_orders')) || [];
+                const currentOrder = orders.find(o => o.id === activeOrderId);
+                if (currentOrder) {
+                    showActiveTracker(currentOrder.id, currentOrder.status);
+                }
             }
         }
 
@@ -937,8 +1003,6 @@
                 showToast('Pelacakan pesanan ditutup.', 'info');
             }
         }
-
-        renderMenu();
     </script>
 </body>
 </html>
