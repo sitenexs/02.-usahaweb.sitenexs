@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Sitenexs Cafe & Resto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CDN Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-subtle: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-full: 9999px;
+            --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --badge-makanan-bg: #eff6ff; --badge-makanan-text: #1d4ed8;
+            --badge-minuman-bg: #f0fdf4; --badge-minuman-text: #15803d;
+            --badge-snack-bg: #fffbeb; --badge-snack-text: #b45309;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-size: 0.85rem;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        aside {
+            width: 280px;
+            background: #ffffff;
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; bottom: 0; left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 1.25rem 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1rem 0.75rem;
+        }
+
+        .sidebar-menu li { margin-bottom: 0.35rem; }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* Sidebar Payment Settings */
+        .sidebar-section {
+            padding: 1rem 0.85rem;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: auto;
+            background: #f8fafc;
+        }
+
+        .sidebar-section h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .sidebar-form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text-muted);
+        }
+
+        .sidebar-control {
+            width: 100%;
+            padding: 0.45rem 0.6rem;
+            font-size: 0.75rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            outline: none;
+            background: #fff;
+            transition: var(--transition);
+        }
+        .sidebar-control:focus { border-color: var(--primary); }
+
+        .sidebar-qris-preview {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.35rem;
+            background: #fff;
+            padding: 0.35rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+        }
+
+        .sidebar-qris-thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: #fff;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 900;
+            backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.show { display: block; }
+
+        main {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem;
+            max-width: calc(100vw - 280px);
+            transition: var(--transition);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+            background: #ffffff;
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-sm);
+            gap: 1rem;
+        }
+
+        header h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.15rem; }
+        header p { color: var(--text-muted); font-size: 0.8rem; }
+
+        .mobile-toggle-btn {
+            display: none;
+            background: none; border: none;
+            font-size: 1.25rem; color: var(--text-main);
+            cursor: pointer; padding: 0.25rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; background: var(--primary-light);
+            color: var(--primary); flex-shrink: 0;
+        }
+
+        .stat-info h4 { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-bottom: 0.2rem; }
+        .stat-info span { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+
+        .section-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            gap: 1rem;
+        }
+
+        .section-header h3 { font-size: 1.05rem; font-weight: 700; }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; white-space: nowrap; }
+        th, td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+        th { background: #f8fafc; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; }
+        tr:hover td { background: #f8fafc; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+            padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600;
+            border-radius: var(--radius-sm); cursor: pointer; border: none; transition: var(--transition);
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+        .btn-secondary { background: #e2e8f0; color: var(--text-main); }
+        .btn-secondary:hover { background: #cbd5e1; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
+            z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; padding: 1rem;
+        }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content {
+            background: #ffffff; width: 100%; max-width: 480px; max-height: 90vh;
+            overflow-y: auto; border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-md);
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .form-control {
+            width: 100%; padding: 0.6rem 0.75rem; font-size: 0.85rem;
+            border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); outline: none; transition: var(--transition);
+            background: #fff;
+        }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+
+        .img-preview-container { margin-top: 0.5rem; display: flex; align-items: center; gap: 1rem; }
+        .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: #f1f5f9; }
+
+        .badge { display: inline-block; padding: 0.25rem 0.6rem; font-size: 0.7rem; font-weight: 600; border-radius: var(--radius-full); text-transform: uppercase; }
+        .badge-makanan { background: var(--badge-makanan-bg); color: var(--badge-makanan-text); }
+        .badge-minuman { background: var(--badge-minuman-bg); color: var(--badge-minuman-text); }
+        .badge-snack { background: var(--badge-snack-bg); color: var(--badge-snack-text); }
+
+        #toast-notification {
+            position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff;
+            padding: 0.75rem 1.25rem; border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+            display: flex; align-items: center; gap: 0.75rem; z-index: 3000; font-size: 0.85rem;
+            transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+        }
+        #toast-notification.show { transform: translateY(0); opacity: 1; }
+        #toast-notification.success { background: var(--success); }
+        #toast-notification.error { background: var(--danger); }
+        #toast-notification.info { background: var(--primary); }
+
+        @media(max-width: 768px) {
+            aside { transform: translateX(-100%); }
+            aside.show { transform: translateX(0); }
+            main { margin-left: 0; max-width: 100vw; padding: 1rem 0.75rem; }
+            header { flex-direction: column; align-items: flex-start; padding: 1rem; }
+            .mobile-toggle-btn { display: inline-block; }
+            .stats-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .section-header { flex-direction: column; align-items: stretch; }
+            .section-header input[type="text"] { width: 100% !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div id="toast-notification">
+        <i id="toast-icon" class="fas fa-info-circle"></i>
+        <span id="toast-message">Pesan notifikasi...</span>
+    </div>
+
+    <aside id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-utensils"></i> <span>Sitenexs Admin</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active"><i class="fas fa-burger"></i> <span>Kelola Produk</span></a></li>
+            <li><a href="pelayan.html"><i class="fas fa-cash-register"></i> <span>Kasir / Pelayan</span></a></li>
+            <li><a href="pesan.html" target="_blank"><i class="fas fa-external-link-alt"></i> <span>Buka Menu Pelanggan</span></a></li>
+        </ul>
+
+        <!-- Pengaturan Pembayaran di dalam Sidebar -->
+        <div class="sidebar-section">
+            <h4><i class="fas fa-wallet text-primary"></i> Pengaturan Pembayaran</h4>
+            <form id="payment-settings-form" onsubmit="savePaymentSettings(event)">
+                <div class="sidebar-form-group">
+                    <label><i class="fas fa-qrcode"></i> Kode QRIS Cafe</label>
+                    <input type="file" id="qris-file-input" class="sidebar-control" accept="image/*" onchange="handleQrisUpload(event)">
+                    <input type="hidden" id="setting-qris-img">
+                    <div class="sidebar-qris-preview">
+                        <img id="qris-preview" class="sidebar-qris-thumb" src="" alt="QRIS" onerror="this.src='https://via.placeholder.com/40?text=QRIS';">
+                        <span style="font-size: 0.65rem; color: var(--text-muted);">Pratinjau QRIS Aktif</span>
+                    </div>
+                </div>
+                <div class="sidebar-form-group">
+                    <label><i class="fas fa-university"></i> Rekening Bank</label>
+                    <textarea id="setting-bank-info" class="sidebar-control" rows="3" placeholder="BCA: 1234-5678 a.n Cafe" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.75rem; padding: 0.4rem;" id="btn-save-settings">
+                    <i class="fas fa-save"></i> Simpan Pembayaran
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <div class="header-top">
+                <button class="mobile-toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <div>
+                    <h1>Manajemen Produk</h1>
+                    <p>Kelola daftar menu makanan dan minuman Sitenexs Cafe & Resto.</p>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddModal()"><i class="fas fa-plus"></i> Tambah Produk Baru</button>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-utensils"></i></div>
+                <div class="stat-info">
+                    <h4>Total Menu</h4>
+                    <span id="stat-total-products">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #dcfce7; color: #166534;"><i class="fas fa-bowl-food"></i></div>
+                <div class="stat-info">
+                    <h4>Makanan Utama</h4>
+                    <span id="stat-makanan">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #92400e;"><i class="fas fa-mug-hot"></i></div>
+                <div class="stat-info">
+                    <h4>Minuman & Snack</h4>
+                    <span id="stat-minuman-snack">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Produk -->
+        <div class="section-box">
+            <div class="section-header">
+                <h3>Daftar Produk Aktif</h3>
+                <input type="text" id="search-product" placeholder="Cari menu..." class="form-control" style="width: 240px;" oninput="renderAdminProducts()">
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Gambar</th>
+                            <th>Nama Produk</th>
+                            <th>Kategori</th>
+                            <th>Harga</th>
+                            <th>Deskripsi</th>
+                            <th style="text-align: right;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-product-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Form Produk -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 id="modal-title" style="font-size: 1.1rem; font-weight: 700;">Tambah Produk Baru</h3>
+                <button onclick="closeProductModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label>Nama Produk</label>
+                    <input type="text" id="product-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="product-category" class="form-control" required>
+                        <option value="makanan">Makanan Utama</option>
+                        <option value="minuman">Minuman</option>
+                        <option value="snack">Snack / Dessert</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Harga (Rp)</label>
+                    <input type="number" id="product-price" class="form-control" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Upload Gambar Produk</label>
+                    <input type="file" id="product-img-file" class="form-control" accept="image/*" onchange="handleImageUpload(event)">
+                    <input type="hidden" id="product-img" required>
+                    <div class="img-preview-container">
+                        <img id="img-preview-box" class="img-preview" src="" alt="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi Singkat</label>
+                    <textarea id="product-desc" class="form-control" rows="2"></textarea>
+                </div>
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Batal</button>
+                    <button type="submit" id="btn-submit-product" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Produk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://dsycwzobupboqajrdxnq.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzeWN3em9idXBib3FhanJkeG5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MjM5MTQsImV4cCI6MjEwNjA5OTkxNH0.VlhSGAV9MqkJ6thACkJthiKswEFebY3Ufx-EEkilwvI';
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let products = [];
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+            toast.className = '';
+            toast.classList.add(type);
+            toastIcon.className = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
+            toastMsg.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+async function fetchProductsAndSettings() {
+    try {
+        const productsResult = await _supabase
+            .from('products')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (productsResult.error) {
+            console.error('Products:', productsResult.error);
+            showToast('Gagal mengambil produk: ' + productsResult.error.message, 'error');
+            return;
+        }
+
+        products = productsResult.data || [];
+        renderAdminProducts();
+        updateStats();
+
+        const settingsResult = await _supabase
+            .from('settings')
+            .select('*');
+
+        if (settingsResult.error) {
+            console.error('Settings:', settingsResult.error);
+            return;
+        }
+
+        (settingsResult.data || []).forEach(item => {
+            if (item.key === 'qris_img') {
+                document.getElementById('setting-qris-img').value = item.value || '';
+                document.getElementById('qris-preview').src = item.value || '';
+            }
+
+            if (item.key === 'bank_info') {
+                document.getElementById('setting-bank-info').value = item.value || '';
+            }
+        });
+
+    } catch (err) {
+        console.error(err);
+        showToast('Koneksi Supabase bermasalah', 'error');
+    }
+}
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchProductsAndSettings();
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+            document.getElementById('sidebar-overlay').classList.toggle('show');
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total-products').innerText = products.length;
+            document.getElementById('stat-makanan').innerText = products.filter(p => p.category === 'makanan').length;
+            document.getElementById('stat-minuman-snack').innerText = products.filter(p => p.category === 'minuman' || p.category === 'snack').length;
+        }
+
+        function renderAdminProducts() {
+            const tbody = document.getElementById('admin-product-table-body');
+            const searchVal = document.getElementById('search-product').value.toLowerCase();
+            tbody.innerHTML = '';
+            const filtered = products.filter(p => p.name.toLowerCase().includes(searchVal) || p.category.toLowerCase().includes(searchVal));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted);">Tidak ada produk ditemukan.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${p.img}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px;" alt=""></td>
+                        <td><strong>${p.name}</strong></td>
+                        <td><span class="badge badge-${p.category}">${p.category}</span></td>
+                        <td>Rp ${p.price.toLocaleString('id-ID')}</td>
+                        <td style="color: var(--text-muted); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.desc || '-'}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="openEditModal(${p.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger" style="padding: 0.3rem 0.6rem;" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function handleQrisUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showToast('File harus berupa gambar!', 'error');
+        return;
+    }
+
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        img.src = e.target.result;
+    };
+
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+
+        const maxSize = 1000;
+
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxSize) {
+            height = height * maxSize / width;
+            width = maxSize;
+        }
+
+        if (height > maxSize) {
+            width = width * maxSize / height;
+            height = maxSize;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/jpeg', 0.8);
+
+        document.getElementById('setting-qris-img').value = compressed;
+        document.getElementById('qris-preview').src = compressed;
+
+        showToast('QRIS siap digunakan', 'success');
+    };
+
+    reader.readAsDataURL(file);
+}
+
+        async function savePaymentSettings(e) {
+    e.preventDefault();
+
+    const qrisVal = document.getElementById('setting-qris-img').value;
+    const bankVal = document.getElementById('setting-bank-info').value;
+
+    const qris = await _supabase
+        .from('settings')
+        .upsert({
+            key: 'qris_img',
+            value: qrisVal
+        });
+
+    if (qris.error) {
+        showToast('QRIS gagal: ' + qris.error.message, 'error');
+        return;
+    }
+
+    const bank = await _supabase
+        .from('settings')
+        .upsert({
+            key: 'bank_info',
+            value: bankVal
+        });
+
+    if (bank.error) {
+        showToast('Bank gagal: ' + bank.error.message, 'error');
+        return;
+    }
+
+    showToast('Pengaturan pembayaran berhasil disimpan!', 'success');
+}
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; setTimeout(() => document.getElementById(id).classList.add('show'), 10); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); setTimeout(() => document.getElementById(id).style.display = 'none', 300); }
+
+        function openAddModal() {
+            document.getElementById('modal-title').innerText = 'Tambah Produk Baru';
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = '';
+            document.getElementById('product-img').value = '';
+            document.getElementById('img-preview-box').src = '';
+            openModal('product-modal');
+        }
+
+        function openEditModal(id) {
+            const product = products.find(p => p.id === id);
+            document.getElementById('modal-title').innerText = 'Edit Produk Menu';
+            document.getElementById('product-id').value = product.id;
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-category').value = product.category;
+            document.getElementById('product-price').value = product.price;
+            document.getElementById('product-img').value = product.img;
+            document.getElementById('product-desc').value = product.desc || '';
+            document.getElementById('img-preview-box').src = product.img;
+            openModal('product-modal');
+        }
+
+        function closeProductModal() { closeModal('product-modal'); }
+
+        async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showToast('File harus berupa gambar!', 'error');
+        return;
+    }
+
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        img.src = e.target.result;
+    };
+
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+
+        const maxWidth = 800;
+        const maxHeight = 800;
+
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+            height = height * maxWidth / width;
+            width = maxWidth;
+        }
+
+        if (height > maxHeight) {
+            width = width * maxHeight / height;
+            height = maxHeight;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+
+        document.getElementById('product-img').value = compressed;
+        document.getElementById('img-preview-box').src = compressed;
+
+        showToast('Gambar siap digunakan', 'success');
+    };
+
+    reader.readAsDataURL(file);
+}
+
+      async function saveProduct(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('product-id').value;
+    const name = document.getElementById('product-name').value;
+    const category = document.getElementById('product-category').value;
+    const price = parseInt(document.getElementById('product-price').value);
+    const img = document.getElementById('product-img').value;
+    const desc = document.getElementById('product-desc').value;
+
+    if (!img) {
+        showToast('Silakan pilih gambar terlebih dahulu!', 'error');
+        return;
+    }
+
+    let result;
+
+    if (id) {
+        result = await _supabase
+            .from('products')
+            .update({
+                name,
+                category,
+                price,
+                img,
+                desc
+            })
+            .eq('id', parseInt(id));
+    } else {
+        result = await _supabase
+            .from('products')
+            .insert([{
+                name,
+                category,
+                price,
+                img,
+                desc
+            }]);
+    }
+
+    if (result.error) {
+        console.error(result.error);
+        showToast('Gagal: ' + result.error.message, 'error');
+        return;
+    }
+
+    showToast('Produk berhasil disimpan!', 'success');
+
+    await fetchProductsAndSettings();
+    closeProductModal();
+}
+
+        async function deleteProduct(id) {
+            if (confirm('Hapus produk ini dari database?')) {
+                await _supabase.from('products').delete().eq('id', id);
+                showToast('Produk berhasil dihapus.', 'success');
+                fetchProductsAndSettings();
+            }
+        }
+    </script>
+</body>
+              </html>
