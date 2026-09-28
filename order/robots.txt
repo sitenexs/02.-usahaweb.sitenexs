@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://usahaweb.sitenexs.site/order/sitemap.xml
