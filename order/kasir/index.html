@@ -3,34 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Sitenexs">
-    <meta name="language" content="id-ID">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="description" content="Halaman kasir dan pelayan Sitenexs untuk mengelola pesanan, status pesanan, dan notifikasi order pelanggan.">
-    <meta name="keywords" content="kasir, pelayan, order makanan, sistem kasir cafe, management pesanan, dashboard kasir">
-    <meta name="theme-color" content="#2563eb">
-    <link rel="canonical" href="https://sitenexs.site/Order/kasir/">
     <title>Kasir & Pelayan — Sitenexs Cafe & Resto</title>
-    <meta property="og:title" content="Kasir & Pelayan — Sitenexs Cafe & Resto">
-    <meta property="og:description" content="Sistem kasir dan pelayan Sitenexs untuk mengelola pesanan pelanggan secara cepat dan terorganisir.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://sitenexs.site/Order/kasir/">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="icon" type="image/png" href="https://sitenexs.site/assets/favicon/favicon.png">
-
-    <!-- Google tag (gtag.js) -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      window.GA_MEASUREMENT_ID = 'G-FY8W3CJKFL';
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', window.GA_MEASUREMENT_ID);
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FY8W3CJKFL"></script>
     
     <!-- CDN Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -554,16 +531,6 @@
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function requireAuth(requiredRole) {
-            const authData = JSON.parse(localStorage.getItem('sitenexs_auth') || 'null');
-            if (!authData || !authData.isLoggedIn || authData.role !== requiredRole) {
-                const nextPage = encodeURIComponent(window.location.href);
-                window.location.href = 'https://account.sitenexs.site/?role=' + requiredRole + '&next=' + nextPage;
-                return false;
-            }
-            return true;
-        }
-
         let audioCtx = null;
         let lastOrderCount = -1;
         let lastCallCount = -1;
@@ -576,7 +543,6 @@
         let currentSoundStyle = localStorage.getItem('sitenexs_sound_style') || 'beep';
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (!requireAuth('kasir')) return;
             const selectEl = document.getElementById('sound-style-select');
             if (selectEl) selectEl.value = currentSoundStyle;
         });
