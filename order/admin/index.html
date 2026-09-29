@@ -3,34 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Sitenexs">
-    <meta name="language" content="id-ID">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="description" content="Dashboard admin Sitenexs untuk mengelola produk, pengaturan pembayaran, dan data operasional bisnis.">
-    <meta name="keywords" content="admin dashboard, dashboard Sitenexs, admin cafe, kelola produk, sistem kasir, kontrol bisnis">
-    <meta name="theme-color" content="#2563eb">
-    <link rel="canonical" href="https://sitenexs.site/Order/admin/">
     <title>Admin Dashboard — Sitenexs Cafe & Resto</title>
-    <meta property="og:title" content="Admin Dashboard — Sitenexs Cafe & Resto">
-    <meta property="og:description" content="Dashboard admin untuk mengelola menu, pembayaran, dan data operasional bisnis Sitenexs.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://sitenexs.site/Order/admin/">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="icon" type="image/png" href="https://sitenexs.site/assets/favicon/favicon.png">
-
-    <!-- Google tag (gtag.js) -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      window.GA_MEASUREMENT_ID = 'G-FY8W3CJKFL';
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', window.GA_MEASUREMENT_ID);
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FY8W3CJKFL"></script>
     
     <!-- CDN Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -497,16 +474,6 @@
 
         let products = [];
 
-        function requireAuth(requiredRole) {
-            const authData = JSON.parse(localStorage.getItem('sitenexs_auth') || 'null');
-            if (!authData || !authData.isLoggedIn || authData.role !== requiredRole) {
-                const nextPage = encodeURIComponent(window.location.href);
-                window.location.href = 'https://account.sitenexs.site/?role=' + requiredRole + '&next=' + nextPage;
-                return false;
-            }
-            return true;
-        }
-
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast-notification');
             const toastMsg = document.getElementById('toast-message');
@@ -542,7 +509,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (!requireAuth('admin')) return;
             fetchProductsAndSettings();
         });
 
