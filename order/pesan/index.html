@@ -20,7 +20,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google tag (gtag.js) -->
@@ -43,17 +43,18 @@
             --primary-light: #eff6ff;
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
-            --text-main: #1e293b;
+            --text-main: #0f172a;
             --text-muted: #64748b;
             --border-subtle: #e2e8f0;
-            --success: #22c55e;
+            --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --radius-sm: 0.3rem;
-            --radius-md: 0.5rem;
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
             --radius-full: 9999px;
-            --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
-            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08);
+            --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -4px rgba(15, 23, 42, 0.06);
             --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -67,8 +68,8 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            font-size: 0.8rem;
-            padding-bottom: 5.5rem;
+            font-size: 0.825rem;
+            padding-bottom: 6rem;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -83,89 +84,130 @@
             flex-direction: column;
             gap: 0.5rem;
             width: 90%;
-            max-width: 400px;
+            max-width: 380px;
             pointer-events: none;
         }
 
         .toast {
             background: #ffffff;
             border-left: 4px solid var(--primary);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            padding: 0.75rem 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 0.85rem 1rem;
             border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             gap: 0.75rem;
             pointer-events: auto;
-            animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: slideInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             font-size: 0.775rem;
+            font-weight: 500;
         }
 
         .toast.success { border-left-color: var(--success); }
         .toast.error { border-left-color: var(--danger); }
         .toast.warning { border-left-color: var(--warning); }
 
-        .toast i {
-            font-size: 1rem;
-        }
+        .toast i { font-size: 1.1rem; }
         .toast.success i { color: var(--success); }
         .toast.error i { color: var(--danger); }
         .toast.warning i { color: var(--warning); }
         .toast.info i { color: var(--primary); }
 
         @keyframes slideInDown {
-            from { opacity: 0; transform: translateY(-20px); }
+            from { opacity: 0; transform: translateY(-25px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes fadeOutUp {
             from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 0; transform: translateY(-25px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .shake-element {
+            animation: shake 0.4s ease-in-out;
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
         }
 
         header {
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-subtle);
-            padding: 0.75rem 1rem;
+            padding: 0.85rem 1rem;
             position: sticky;
             top: 0;
             z-index: 100;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             box-shadow: var(--shadow-sm);
         }
 
-        header h2 {
-            font-size: 1rem;
-            font-weight: 700;
+        .header-brand {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
+            flex-direction: column;
         }
 
-        header p {
+        .header-brand h2 {
+            font-size: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
+        }
+
+        .header-brand p {
             font-size: 0.7rem;
             color: var(--text-muted);
             margin-top: 0.1rem;
         }
 
+        .guide-btn {
+            background: var(--primary-light);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            color: var(--primary);
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .guide-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
         .container {
-            max-width: 500px;
+            max-width: 480px;
             margin: 0 auto;
-            padding: 0.75rem;
+            padding: 0.85rem;
         }
         
         /* Banner Meja & Nama */
         .order-meta-box {
-            background: var(--primary-light);
-            border: 1px dashed var(--primary);
-            padding: 0.6rem;
+            background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            padding: 0.75rem;
             border-radius: var(--radius-md);
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 0.85rem;
-            font-weight: 600;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
         }
 
         .order-meta-box div {
@@ -173,7 +215,7 @@
             align-items: center;
             justify-content: space-between;
             background: #fff;
-            padding: 0.3rem 0.5rem;
+            padding: 0.4rem 0.6rem;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-subtle);
             transition: var(--transition);
@@ -181,43 +223,45 @@
 
         .order-meta-box div:focus-within {
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .order-meta-box span {
             display: flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.35rem;
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 0.725rem;
+            font-weight: 600;
         }
 
         .order-meta-box input {
-            width: 45px;
-            padding: 0.15rem;
+            width: 48px;
+            padding: 0.2rem;
             text-align: center;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
             font-weight: 700;
             color: var(--primary);
-            font-size: 0.8rem;
+            font-size: 0.825rem;
             outline: none;
             transition: var(--transition);
+            background: #f8fafc;
         }
 
         .order-meta-box input[type="text"] {
-            width: 90px;
+            width: 100px;
             text-align: left;
-            padding-left: 0.3rem;
+            padding-left: 0.4rem;
         }
 
         /* Kategori Filter */
         .category-scroll {
             display: flex;
-            gap: 0.4rem;
+            gap: 0.5rem;
             overflow-x: auto;
-            padding-bottom: 0.4rem;
-            margin-bottom: 0.85rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
             white-space: nowrap;
             scrollbar-width: none;
         }
@@ -229,13 +273,14 @@
         .cat-btn {
             background: #ffffff;
             border: 1px solid var(--border-subtle);
-            padding: 0.35rem 0.75rem;
+            padding: 0.45rem 0.9rem;
             border-radius: var(--radius-full);
             font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             color: var(--text-muted);
             transition: var(--transition);
+            box-shadow: var(--shadow-sm);
         }
 
         .cat-btn:hover {
@@ -248,19 +293,20 @@
             background: var(--primary);
             color: #fff;
             border-color: var(--primary);
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
         }
 
         .section-title {
-            font-size: 0.9rem;
-            margin-bottom: 0.6rem;
+            font-size: 0.925rem;
+            margin-bottom: 0.75rem;
             font-weight: 700;
+            letter-spacing: -0.01em;
         }
 
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
+            gap: 0.85rem;
         }
 
         .menu-card {
@@ -277,13 +323,13 @@
         }
 
         .menu-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
             box-shadow: var(--shadow-md);
             border-color: #cbd5e1;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -291,32 +337,43 @@
             cursor: pointer;
         }
 
+        .menu-img-wrapper {
+            position: relative;
+            height: 125px;
+            width: 100%;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+
         .menu-img {
-            height: 110px;
+            height: 100%;
             width: 100%;
             object-fit: cover;
-            background: #e2e8f0;
-            transition: transform 0.3s ease;
+            transition: transform 0.4s ease;
         }
 
         .menu-card:hover .menu-img {
-            transform: scale(1.03);
+            transform: scale(1.06);
         }
 
         .menu-body {
-            padding: 0.6rem;
-            padding-bottom: 0.3rem;
+            padding: 0.75rem;
+            padding-bottom: 0.4rem;
         }
 
         .menu-title {
-            font-size: 0.8rem;
+            font-size: 0.825rem;
             font-weight: 700;
-            margin-bottom: 0.2rem;
-            line-height: 1.2;
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .menu-price {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--primary);
             font-weight: 700;
         }
@@ -325,8 +382,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.3rem;
-            padding: 0.35rem 0.7rem;
+            gap: 0.4rem;
+            padding: 0.45rem 0.8rem;
             font-size: 0.75rem;
             font-weight: 600;
             border-radius: var(--radius-full);
@@ -337,26 +394,28 @@
         }
 
         .btn:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
         }
 
         .btn-primary {
             background: var(--primary);
             color: #fff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
         }
 
         .btn-secondary {
-            background: #e2e8f0;
+            background: #f1f5f9;
             color: var(--text-main);
+            border: 1px solid var(--border-subtle);
         }
 
         .btn-secondary:hover {
-            background: #cbd5e1;
+            background: #e2e8f0;
         }
         
         /* Floating Bars */
@@ -365,37 +424,38 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
             border-top: 1px solid var(--border-subtle);
-            padding: 0.6rem 1rem;
+            padding: 0.75rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.08);
             z-index: 1000;
-            gap: 0.5rem;
+            gap: 0.75rem;
             transition: var(--transition);
         }
 
         .call-waiter-btn {
-            background: #fef3c7;
+            background: #fffbeb;
             color: #d97706;
-            border: 1px solid #fde68a;
-            padding: 0.4rem 0.75rem;
+            border: 1px solid #fef3c7;
+            padding: 0.5rem 0.9rem;
             border-radius: var(--radius-full);
-            font-size: 0.7rem;
+            font-size: 0.725rem;
             font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.4rem;
             transition: var(--transition);
+            box-shadow: var(--shadow-sm);
         }
 
         .call-waiter-btn:hover {
-            background: #fde68a;
-            transform: scale(1.02);
+            background: #fef3c7;
+            transform: scale(1.03);
         }
 
         /* Modal Smooth Animation */
@@ -406,8 +466,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
             z-index: 2000;
             align-items: flex-end;
             justify-content: center;
@@ -423,13 +483,14 @@
         .modal-content {
             background: #ffffff;
             width: 100%;
-            max-width: 500px;
-            max-height: 85vh;
-            border-radius: var(--radius-md) var(--radius-md) 0 0;
-            padding: 1rem;
+            max-width: 480px;
+            max-height: 88vh;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 1.25rem 1rem 1.5rem 1rem;
             overflow-y: auto;
             transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 -20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .modal.show .modal-content {
@@ -438,10 +499,10 @@
 
         .preview-img-container {
             width: 100%;
-            height: 160px;
-            background: #f1f5f9;
+            height: 170px;
+            background: #f8fafc;
             border-radius: var(--radius-sm);
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -452,7 +513,7 @@
         #detail-img, #confirm-img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             display: block;
         }
 
@@ -460,7 +521,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0;
+            padding: 0.6rem 0;
             border-bottom: 1px solid var(--border-subtle);
             font-size: 0.775rem;
             animation: fadeIn 0.3s ease;
@@ -470,17 +531,17 @@
         .payment-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.4rem;
-            margin: 0.5rem 0;
+            gap: 0.5rem;
+            margin: 0.6rem 0;
         }
 
         .payment-card {
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
-            padding: 0.5rem 0.3rem;
+            padding: 0.6rem 0.4rem;
             text-align: center;
             cursor: pointer;
-            font-size: 0.7rem;
+            font-size: 0.725rem;
             font-weight: 600;
             background: #fff;
             transition: var(--transition);
@@ -495,14 +556,15 @@
             background: var(--primary-light);
             color: var(--primary);
             transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.1);
         }
 
         .payment-detail-box {
             background: #f8fafc;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
-            padding: 0.75rem;
-            margin-top: 0.5rem;
+            padding: 0.85rem;
+            margin-top: 0.6rem;
             font-size: 0.75rem;
             display: none;
             text-align: center;
@@ -511,14 +573,15 @@
         }
 
         .qr-img {
-            width: 140px;
-            height: 140px;
+            width: 130px;
+            height: 130px;
             object-fit: contain;
             margin: 0.4rem auto;
             display: block;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-subtle);
             background: #fff;
+            padding: 4px;
         }
         
         /* Live Status Tracker */
@@ -526,10 +589,47 @@
             background: #fff;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            padding: 0.85rem;
-            margin-bottom: 0.85rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
             text-align: center;
             animation: fadeIn 0.4s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Step Guide Styles */
+        .guide-step {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            margin-bottom: 0.85rem;
+        }
+
+        .guide-step-num {
+            background: var(--primary-light);
+            color: var(--primary);
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .guide-step-text h5 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.1rem;
+        }
+
+        .guide-step-text p {
+            font-size: 0.725rem;
+            color: var(--text-muted);
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -539,32 +639,37 @@
     <div id="toast-container"></div>
 
     <header>
-        <h2><i class="fas fa-utensils text-primary"></i> Sitenexs Cafe & Resto</h2>
-        <p>Pilih menu praktis langsung dari perangkat Anda</p>
+        <div class="header-brand">
+            <h2><i class="fas fa-utensils" style="color: var(--primary);"></i> Sitenexs Cafe & Resto</h2>
+            <p>Sistem Self-Order Digital Meja Anda</p>
+        </div>
+        <button class="guide-btn" onclick="openGuideModal()" title="Panduan Pemesanan">
+            <i class="fas fa-question"></i>
+        </button>
     </header>
 
     <div class="container">
         <!-- Live Status Tracker -->
         <div id="active-tracker" style="display: none;" class="tracker-box">
-            <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.15rem;">
+            <h4 style="font-size: 0.875rem; font-weight: 700; color: var(--primary); margin-bottom: 0.2rem;">
                 <i class="fas fa-clock"></i> Status Pesanan: <span id="track-status-text">Menunggu</span>
             </h4>
-            <p style="font-size: 0.7rem; color: var(--text-muted);">ID Pesanan: <b id="track-order-id">#---</b></p>
-            <div style="background: var(--border-subtle); height: 4px; width: 100%; margin: 0.6rem 0; border-radius: var(--radius-full); overflow: hidden;">
-                <div id="tracker-bar" style="background: var(--primary); height: 100%; width: 33%; transition: width 0.4s ease;"></div>
+            <p style="font-size: 0.725rem; color: var(--text-muted);">ID Pesanan: <b id="track-order-id">#---</b></p>
+            <div style="background: var(--border-subtle); height: 6px; width: 100%; margin: 0.75rem 0; border-radius: var(--radius-full); overflow: hidden;">
+                <div id="tracker-bar" style="background: var(--primary); height: 100%; width: 33%; transition: width 0.4s ease; border-radius: var(--radius-full);"></div>
             </div>
-            <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.3rem; width: auto;" onclick="cancelActiveOrder()">Tutup Pelacakan</button>
+            <button class="btn btn-secondary" style="font-size: 0.725rem; padding: 0.35rem; width: auto;" onclick="cancelActiveOrder()">Tutup Pelacakan</button>
         </div>
 
         <!-- Meta Meja & Nama -->
         <div class="order-meta-box">
             <div>
-                <span><i class="fas fa-chair"></i>Nomor Meja...</span>
-                <input type="number" id="table-number" value="" placeholder="No..." min="" onchange="syncMeta('table')">
+                <span><i class="fas fa-chair text-primary"></i> Meja <span style="color:var(--danger)">*</span></span>
+                <input type="number" id="table-number" value="" placeholder="No..." min="1" onchange="syncMeta('table')">
             </div>
             <div>
-                <span><i class="fas fa-user"></i> Nama</span>
-                <input type="text" id="customer-name" placeholder="Nama..." oninput="syncMeta('name')">
+                <span><i class="fas fa-user text-primary"></i> Nama <span style="color:var(--danger)">*</span></span>
+                <input type="text" id="customer-name" placeholder="Nama Anda..." oninput="syncMeta('name')">
             </div>
         </div>
 
@@ -587,28 +692,73 @@
         <button class="call-waiter-btn" onclick="callWaiter()">
             <i class="fas fa-bell"></i> Panggil Pelayan
         </button>
-        <div id="cart-bar-info" style="display: none; align-items: center; gap: 0.5rem; animation: fadeIn 0.3s ease;">
+        <div id="cart-bar-info" style="display: none; align-items: center; gap: 0.6rem; animation: fadeIn 0.3s ease;">
             <div style="text-align: right;">
-                <span style="font-size: 0.65rem; color: var(--text-muted); display: block;"><span id="cart-count">0</span> Item</span>
-                <span id="cart-total" style="font-size: 0.8rem; font-weight: 700; color: var(--primary);">Rp 0</span>
+                <span style="font-size: 0.675rem; color: var(--text-muted); display: block;"><span id="cart-count">0</span> Item</span>
+                <span id="cart-total" style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">Rp 0</span>
             </div>
-            <button class="btn btn-primary" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.75rem;" onclick="openCartModal()">Lihat Pesanan</button>
+            <button class="btn btn-primary" style="width: auto; padding: 0.45rem 0.9rem; font-size: 0.75rem;" onclick="openCartModal()">Lihat Pesanan</button>
+        </div>
+    </div>
+
+    <!-- Modal Panduan / Instruksi Penggunaan -->
+    <div class="modal" id="guide-modal">
+        <div class="modal-content" style="max-width: 380px; margin: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h3 style="font-size: 1rem; font-weight: 700; display:flex; align-items:center; gap:0.4rem;">
+                    <i class="fas fa-book-open text-primary" style="color:var(--primary);"></i> Panduan Pemesanan
+                </h3>
+                <button onclick="closeGuideModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <div class="guide-step">
+                    <div class="guide-step-num">1</div>
+                    <div class="guide-step-text">
+                        <h5>Isi Nomor Meja & Nama</h5>
+                        <p>Pastikan Anda memasukkan nomor meja tempat Anda duduk dan nama Anda pada kolom di bagian atas.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">2</div>
+                    <div class="guide-step-text">
+                        <h5>Pilih Menu Favorit</h5>
+                        <p>Jelajahi kategori makanan, minuman, atau snack, lalu klik menu untuk melihat detail atau tombol "Tambah".</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">3</div>
+                    <div class="guide-step-text">
+                        <h5>Atur Catatan & Porsi</h5>
+                        <p>Anda bisa menambahkan catatan khusus (misal: "pedas sedang", "tanpa es") sebelum memasukkannya ke keranjang.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">4</div>
+                    <div class="guide-step-text">
+                        <h5>Checkout & Pembayaran</h5>
+                        <p>Buka keranjang pesanan, pilih metode pembayaran (QRIS, Transfer, atau Kasir), lalu kirim pesanan ke dapur!</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="closeGuideModal()">Mengerti, Mulai Pesan</button>
         </div>
     </div>
 
     <!-- Modal Detail Makanan -->
     <div class="modal" id="detail-modal">
-        <div class="modal-content" style="max-width: 360px; margin: auto; border-radius: var(--radius-md);">
+        <div class="modal-content" style="max-width: 380px; margin: auto;">
             <div style="display: flex; justify-content: flex-end; margin-bottom: 0.2rem;">
-                <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+                <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
-            <div class="preview-img-container" style="height: 180px;">
+            <div class="preview-img-container" style="height: 190px;">
                 <img id="detail-img" src="" alt="">
             </div>
-            <h3 id="detail-title" style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem;"></h3>
-            <div id="detail-price" style="font-size: 0.85rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;"></div>
-            <p id="detail-desc" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4;"></p>
-            <button class="btn btn-primary" id="btn-detail-add" style="font-size: 0.75rem;">
+            <h3 id="detail-title" style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;"></h3>
+            <div id="detail-price" style="font-size: 0.9rem; color: var(--primary); font-weight: 700; margin-bottom: 0.6rem;"></div>
+            <p id="detail-desc" style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 1.2rem; line-height: 1.5;"></p>
+            <button class="btn btn-primary" id="btn-detail-add" style="font-size: 0.775rem; padding: 0.55rem;">
                 <i class="fas fa-plus"></i> Tambah ke Pesanan
             </button>
         </div>
@@ -616,37 +766,37 @@
 
     <!-- Modal Konfirmasi Tambah Menu, Gambar, Qty (+/-) & Catatan -->
     <div class="modal" id="confirm-modal">
-        <div class="modal-content" style="max-width: 360px; margin: auto; border-radius: var(--radius-md);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                <h3 style="font-size: 0.95rem; font-weight: 700;">Atur Jumlah Pesanan</h3>
-                <button onclick="closeConfirmModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+        <div class="modal-content" style="max-width: 380px; margin: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="font-size: 1rem; font-weight: 700;">Atur Jumlah Pesanan</h3>
+                <button onclick="closeConfirmModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
             
             <div class="preview-img-container" style="height: 150px;">
                 <img id="confirm-img" src="" alt="">
             </div>
             
-            <h4 id="confirm-item-name" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.1rem;"></h4>
-            <div id="confirm-item-price" style="font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-bottom: 0.75rem;"></div>
+            <h4 id="confirm-item-name" style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.15rem;"></h4>
+            <div id="confirm-item-price" style="font-size: 0.825rem; color: var(--primary); font-weight: 700; margin-bottom: 0.85rem;"></div>
 
             <!-- Kontrol Tambah Kurang Qty -->
-            <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-body); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 0.75rem;">
-                <span style="font-size: 0.75rem; font-weight: 600;">Jumlah Porsi:</span>
-                <div style="display: flex; align-items: center; gap: 0.6rem;">
-                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; width: auto;" onclick="adjustPromptQty(-1)"><i class="fas fa-minus"></i></button>
-                    <span id="prompt-qty" style="font-weight: 700; font-size: 0.9rem; width: 20px; text-align: center;">1</span>
-                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; width: auto;" onclick="adjustPromptQty(1)"><i class="fas fa-plus"></i></button>
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 0.85rem;">
+                <span style="font-size: 0.775rem; font-weight: 600;">Jumlah Porsi:</span>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; width: auto;" onclick="adjustPromptQty(-1)"><i class="fas fa-minus"></i></button>
+                    <span id="prompt-qty" style="font-weight: 700; font-size: 0.95rem; width: 20px; text-align: center;">1</span>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; width: auto;" onclick="adjustPromptQty(1)"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
 
-            <div style="margin-bottom: 1rem;">
-                <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.2rem;">Catatan Khusus (Opsional):</label>
-                <input type="text" id="item-note" placeholder="Misal: Pedas sedang, tanpa es" style="width: 100%; padding: 0.4rem 0.5rem; font-size: 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); outline: none;">
+            <div style="margin-bottom: 1.1rem;">
+                <label style="font-size: 0.725rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.3rem;">Catatan Khusus (Opsional):</label>
+                <input type="text" id="item-note" placeholder="Misal: Pedas sedang, tanpa es" style="width: 100%; padding: 0.5rem 0.6rem; font-size: 0.775rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); outline: none; background: #f8fafc;">
             </div>
 
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-secondary" onclick="closeConfirmModal()" style="font-size: 0.75rem;">Batal</button>
-                <button class="btn btn-primary" id="btn-confirm-yes" style="font-size: 0.75rem;">Tambahkan ke Pesanan</button>
+            <div style="display: flex; gap: 0.6rem;">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()" style="font-size: 0.775rem;">Batal</button>
+                <button class="btn btn-primary" id="btn-confirm-yes" style="font-size: 0.775rem;">Tambahkan</button>
             </div>
         </div>
     </div>
@@ -654,75 +804,80 @@
     <!-- Modal Keranjang & Pembayaran -->
     <div class="modal" id="cart-modal">
         <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                <h3 style="font-size: 1rem; font-weight: 700;">Detail Pesanan Meja</h3>
-                <button onclick="closeCartModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                <h3 style="font-size: 1.05rem; font-weight: 700;">Detail Pesanan Meja</h3>
+                <button onclick="closeCartModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- Input Meja & Nama Tambahan di dalam Modal (jika masih kosong) -->
-            <div style="background: var(--primary-light); border: 1px dashed var(--primary); padding: 0.5rem; border-radius: var(--radius-sm); display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 0.75rem;">
-                <div>
-                    <label style="font-size: 0.65rem; color: var(--text-muted); display: block; margin-bottom: 2px;"><i class="fas fa-chair"></i> Nomor Meja</label>
-                    <input type="number" id="modal-table-number" placeholder="No..." style="width: 100%; padding: 0.3rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 700; color: var(--primary); font-size: 0.75rem; outline: none; background: #fff;" oninput="syncMeta('modal-table')">
-                </div>
-                <div>
-                    <label style="font-size: 0.65rem; color: var(--text-muted); display: block; margin-bottom: 2px;"><i class="fas fa-user"></i> Nama Tamu</label>
-                    <input type="text" id="modal-customer-name" placeholder="Nama..." style="width: 100%; padding: 0.3rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 600; font-size: 0.75rem; outline: none; background: #fff;" oninput="syncMeta('modal-name')">
+            <!-- Input Meja & Nama Diperjelas di dalam Modal Keranjang -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.85rem;">
+                <p style="font-size: 0.725rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <i class="fas fa-info-circle"></i> Mohon lengkapi identitas meja Anda sebelum kirim:
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--text-main); display: block; margin-bottom: 3px; font-weight: 700;"><i class="fas fa-chair text-primary"></i> Nomor Meja <span style="color:var(--danger)">*</span></label>
+                        <input type="number" id="modal-table-number" placeholder="No Meja..." style="width: 100%; padding: 0.45rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 700; color: var(--primary); font-size: 0.8rem; outline: none; background: #fff;" oninput="syncMeta('modal-table')">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--text-main); display: block; margin-bottom: 3px; font-weight: 700;"><i class="fas fa-user text-primary"></i> Nama Tamu <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="modal-customer-name" placeholder="Nama Anda..." style="width: 100%; padding: 0.45rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 700; font-size: 0.8rem; outline: none; background: #fff;" oninput="syncMeta('modal-name')">
+                    </div>
                 </div>
             </div>
 
-            <div id="cart-items-container" style="margin-bottom: 0.75rem; max-height: 140px; overflow-y: auto;">
+            <div id="cart-items-container" style="margin-bottom: 0.85rem; max-height: 150px; overflow-y: auto;">
                 <!-- List keranjang -->
             </div>
             
-            <div style="margin-bottom: 0.75rem;">
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 0.3rem;">Pilih Metode Pembayaran:</label>
+            <div style="margin-bottom: 0.85rem;">
+                <label style="font-size: 0.775rem; font-weight: 700; display: block; margin-bottom: 0.4rem;">Pilih Metode Pembayaran:</label>
                 <div class="payment-options">
                     <label class="payment-card" onclick="selectPayment('qris')">
                         <input type="radio" name="payment" value="QRIS">
-                        <i class="fas fa-qrcode" style="font-size: 1rem; display: block; margin-bottom: 2px;"></i> QRIS
+                        <i class="fas fa-qrcode" style="font-size: 1.1rem; display: block; margin-bottom: 3px;"></i> QRIS
                     </label>
                     <label class="payment-card" onclick="selectPayment('bank')">
                         <input type="radio" name="payment" value="Bank Transfer">
-                        <i class="fas fa-university" style="font-size: 1rem; display: block; margin-bottom: 2px;"></i> Transfer
+                        <i class="fas fa-university" style="font-size: 1.1rem; display: block; margin-bottom: 3px;"></i> Transfer
                     </label>
                     <label class="payment-card" onclick="selectPayment('kasir')">
                         <input type="radio" name="payment" value="Kasir">
-                        <i class="fas fa-cash-register" style="font-size: 1rem; display: block; margin-bottom: 2px;"></i> Kasir
+                        <i class="fas fa-cash-register" style="font-size: 1.1rem; display: block; margin-bottom: 3px;"></i> Kasir
                     </label>
                 </div>
 
                 <!-- QRIS Dinamis dari Admin -->
                 <div id="pay-qris" class="payment-detail-box">
-                    <img id="dynamic-qris-img" src="QR.png" alt="QRIS Code" class="qr-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/140?text=QRIS+Tidak+Tersedia';">
-                    <p style="font-size: 0.7rem; margin-top: 4px;">Scan QRIS di atas menggunakan e-Wallet atau M-Banking Anda.</p>
+                    <img id="dynamic-qris-img" src="QR.png" alt="QRIS Code" class="qr-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/130?text=QRIS+Tidak+Tersedia';">
+                    <p style="font-size: 0.725rem; margin-top: 6px;">Scan QRIS di atas menggunakan e-Wallet atau M-Banking Anda.</p>
                 </div>
                 <!-- Bank Transfer Dinamis dari Admin -->
                 <div id="pay-bank" class="payment-detail-box">
-                    <p id="dynamic-bank-info" style="font-size: 0.7rem;">Memuat informasi rekening...</p>
+                    <p id="dynamic-bank-info" style="font-size: 0.725rem;">Memuat informasi rekening...</p>
                 </div>
                 <div id="pay-kasir" class="payment-detail-box">
-                    <p style="font-size: 0.7rem;">Silakan lakukan pembayaran langsung ke Kasir setelah pesanan selesai.</p>
+                    <p style="font-size: 0.725rem;">Silakan lakukan pembayaran langsung ke Kasir setelah pesanan selesai.</p>
                 </div>
             </div>
 
-            <!-- Upload Bukti Pembayaran Wajib -->
-            <div id="payment-proof-section" style="margin-bottom: 0.75rem; background: var(--bg-body); padding: 0.6rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle); display: none;">
-                <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.3rem;">
-                    <i class="fas fa-upload text-primary"></i> Unggah Bukti Pembayaran <span style="color:var(--danger)">*Wajib</span>
+            <!-- Upload Bukti Pembayaran -->
+            <div id="payment-proof-section" style="margin-bottom: 0.85rem; background: #f8fafc; padding: 0.7rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle); display: none;">
+                <label style="font-size: 0.725rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.35rem;">
+                    <i class="fas fa-upload text-primary" style="color: var(--primary);"></i> Unggah Bukti Pembayaran <span style="color:var(--danger)">*Wajib</span>
                 </label>
-                <input type="file" id="proof-file-input" accept="image/*" onchange="handleProofUpload(event)" style="font-size: 0.7rem; width: 100%;">
-                <div id="proof-preview-container" style="margin-top: 0.4rem; display: none; text-align: center;">
-                    <img id="proof-preview-img" src="" alt="Bukti Transfer" style="max-height: 100px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-                    <p style="font-size: 0.65rem; color: var(--success); margin-top: 2px;"><i class="fas fa-check-circle"></i> Bukti berhasil dilampirkan</p>
+                <input type="file" id="proof-file-input" accept="image/*" onchange="handleProofUpload(event)" style="font-size: 0.725rem; width: 100%;">
+                <div id="proof-preview-container" style="margin-top: 0.5rem; display: none; text-align: center;">
+                    <img id="proof-preview-img" src="" alt="Bukti Transfer" style="max-height: 110px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); object-fit: contain;">
+                    <p style="font-size: 0.675rem; color: var(--success); margin-top: 3px; font-weight: 600;"><i class="fas fa-check-circle"></i> Bukti berhasil dilampirkan</p>
                 </div>
             </div>
 
-            <div style="font-weight: 700; font-size: 0.9rem; display: flex; justify-content: space-between; margin-bottom: 1rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+            <div style="font-weight: 700; font-size: 0.925rem; display: flex; justify-content: space-between; margin-bottom: 1.1rem; border-top: 1px solid var(--border-subtle); padding-top: 0.6rem;">
                 <span>Total Pembayaran:</span>
                 <span id="modal-total" style="color: var(--primary);">Rp 0</span>
             </div>
-            <button id="btn-checkout" class="btn btn-primary" style="padding: 0.6rem; font-size: 0.8rem;" onclick="checkoutOrder()">
+            <button id="btn-checkout" class="btn btn-primary" style="padding: 0.65rem; font-size: 0.825rem;" onclick="checkoutOrder()">
                 <i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir
             </button>
         </div>
@@ -758,8 +913,8 @@
             container.appendChild(toast);
 
             setTimeout(() => {
-                toast.style.animation = 'fadeOutUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-                setTimeout(() => toast.remove(), 300);
+                toast.style.animation = 'fadeOutUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                setTimeout(() => toast.remove(), 350);
             }, 3000);
         }
 
@@ -774,7 +929,6 @@
             renderMenu(currentFilter);
         }
 
-        // Ambil Pengaturan Pembayaran (QRIS & Bank) dari Database
         async function fetchPaymentSettings() {
             const { data, error } = await _supabase.from('settings').select('*');
             if (!error && data) {
@@ -801,13 +955,18 @@
                 document.getElementById('modal-customer-name').value = savedName;
             }
 
+            if (!localStorage.getItem('sitenexs_guide_shown')) {
+                openGuideModal();
+                localStorage.setItem('sitenexs_guide_shown', 'true');
+            }
+
             if (activeOrderId) {
                 checkOrderStatus();
                 setInterval(checkOrderStatus, 3000); 
             }
 
             fetchMenuProducts();
-            fetchPaymentSettings(); // Ambil data QRIS & Bank dari admin
+            fetchPaymentSettings();
 
             _supabase
               .channel('public:products')
@@ -816,6 +975,14 @@
               })
               .subscribe();
         });
+
+        function openGuideModal() {
+            openModal('guide-modal');
+        }
+
+        function closeGuideModal() {
+            closeModal('guide-modal');
+        }
 
         function syncMeta(source) {
             let tableVal = '';
@@ -845,8 +1012,8 @@
             
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div style="grid-column: span 2; text-align: center; padding: 2rem; color: var(--text-muted);">
-                        <i class="fas fa-box-open" style="font-size: 1.5rem; margin-bottom: 0.4rem; display: block;"></i>
+                    <div style="grid-column: span 2; text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+                        <i class="fas fa-box-open" style="font-size: 1.75rem; margin-bottom: 0.5rem; display: block; color: #cbd5e1;"></i>
                         Belum ada menu pada kategori ini.
                     </div>`;
                 return;
@@ -856,13 +1023,15 @@
                 container.innerHTML += `
                     <div class="menu-card">
                         <div class="menu-clickable" onclick="openDetailModal(${p.id})">
-                            <img src="${p.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80'}" class="menu-img" alt="${p.name}">
+                            <div class="menu-img-wrapper">
+                                <img src="${p.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80'}" class="menu-img" alt="${p.name}">
+                            </div>
                             <div class="menu-body">
                                 <div class="menu-title">${p.name}</div>
                                 <div class="menu-price">Rp ${p.price.toLocaleString('id-ID')}</div>
                             </div>
                         </div>
-                        <div style="padding: 0 0.6rem 0.6rem 0.6rem;">
+                        <div style="padding: 0 0.75rem 0.75rem 0.75rem;">
                             <button class="btn btn-primary" onclick="promptAddToCart(${p.id})">
                                 <i class="fas fa-plus"></i> Tambah
                             </button>
@@ -995,13 +1164,13 @@
                 container.innerHTML += `
                     <div class="cart-item-row">
                         <div style="flex: 1;">
-                            <strong>${item.name}</strong> ${item.note ? `<br><small style="color:var(--primary)">Catatan: ${item.note}</small>` : ''}<br>
+                            <strong>${item.name}</strong> ${item.note ? `<br><small style="color:var(--primary); font-weight:600;">Catatan: ${item.note}</small>` : ''}<br>
                             <small style="color: var(--text-muted);">Rp ${item.price.toLocaleString('id-ID')} x ${item.qty}</small>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 0.4rem;">
-                            <button class="btn btn-secondary" style="padding: 0.1rem 0.4rem; width: auto;" onclick="updateCartQty(${index}, -1)"><i class="fas fa-minus"></i></button>
-                            <span style="font-weight: 700; width: 15px; text-align: center;">${item.qty}</span>
-                            <button class="btn btn-secondary" style="padding: 0.1rem 0.4rem; width: auto;" onclick="updateCartQty(${index}, 1)"><i class="fas fa-plus"></i></button>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <button class="btn btn-secondary" style="padding: 0.15rem 0.45rem; width: auto;" onclick="updateCartQty(${index}, -1)"><i class="fas fa-minus"></i></button>
+                            <span style="font-weight: 700; width: 18px; text-align: center;">${item.qty}</span>
+                            <button class="btn btn-secondary" style="padding: 0.15rem 0.45rem; width: auto;" onclick="updateCartQty(${index}, 1)"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
                 `;
@@ -1029,7 +1198,12 @@
             if (method === 'kasir') document.getElementById('pay-kasir').style.display = 'block';
 
             const proofSection = document.getElementById('payment-proof-section');
-            proofSection.style.display = 'block';
+            if (method === 'kasir') {
+                proofSection.style.display = 'none';
+                uploadedPaymentProofBase64 = '';
+            } else {
+                proofSection.style.display = 'block';
+            }
         }
 
         function handleProofUpload(event) {
@@ -1047,27 +1221,40 @@
         }
 
         async function checkoutOrder() {
-            const tableNumber = document.getElementById('modal-table-number').value || document.getElementById('table-number').value;
-            const customerName = (document.getElementById('modal-customer-name').value || document.getElementById('customer-name').value).trim();
+            const tableInputEl = document.getElementById('modal-table-number');
+            const nameInputEl = document.getElementById('modal-customer-name');
             
+            const tableNumber = tableInputEl.value.trim();
+            const customerName = nameInputEl.value.trim();
+            
+            // Validasi Nomor Meja
             if (!tableNumber) {
                 showToast('Mohon isi nomor meja Anda terlebih dahulu!', 'warning');
-                document.getElementById('modal-table-number').focus();
+                tableInputEl.classList.add('shake-element');
+                tableInputEl.focus();
+                setTimeout(() => tableInputEl.classList.remove('shake-element'), 600);
                 return;
             }
+            
+            // Validasi Nama Tamu
             if (!customerName) {
                 showToast('Mohon isi nama tamu terlebih dahulu!', 'warning');
-                document.getElementById('modal-customer-name').focus();
+                nameInputEl.classList.add('shake-element');
+                nameInputEl.focus();
+                setTimeout(() => nameInputEl.classList.remove('shake-element'), 600);
                 return;
             }
+
             if (!selectedPaymentMethod) {
                 showToast('Silakan pilih metode pembayaran terlebih dahulu!', 'warning');
                 return;
             }
-            if (!uploadedPaymentProofBase64) {
+            
+            if (selectedPaymentMethod !== 'kasir' && !uploadedPaymentProofBase64) {
                 showToast('Anda wajib mengunggah bukti pembayaran terlebih dahulu!', 'error');
                 return;
             }
+
             if (cart.length === 0) return;
 
             const btnCheckout = document.getElementById('btn-checkout');
@@ -1082,7 +1269,7 @@
                 items: cart,
                 total: cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
                 paymentMethod: selectedPaymentMethod,
-                paymentProof: uploadedPaymentProofBase64, 
+                paymentProof: uploadedPaymentProofBase64 || 'Bayar di Kasir', 
                 time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
                 status: 'Menunggu'
             };
@@ -1101,11 +1288,15 @@
             activeOrderId = orderIdFormatted;
 
             showActiveTracker(orderIdFormatted, 'Menunggu');
-            showToast(`Pesanan berhasil dikirim dengan bukti pembayaran!`, 'success');
+            showToast('Pesanan berhasil dikirim!', 'success');
             
             cart = [];
             selectedPaymentMethod = '';
             uploadedPaymentProofBase64 = '';
+            
+            document.getElementById('proof-file-input').value = '';
+            document.getElementById('proof-preview-container').style.display = 'none';
+
             updateCartBar();
             closeCartModal();
 
