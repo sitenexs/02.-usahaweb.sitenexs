@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Pemesanan - Modern Cafe</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Panel Kontrol untuk Input & Tombol Cetak (Tidak ikut tercetak) */
+        .control-panel {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+        .control-panel label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+        .control-panel input {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            width: 120px;
+            outline: none;
+            text-align: center;
+            font-weight: 600;
+            color: #d97706;
+        }
+        .control-panel input:focus {
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        .print-btn {
+            background: #d97706;
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .print-btn:hover {
+            background: #b45309;
+        }
+
+        /* Kartu QR Code Utama */
+        .qr-card {
+            background: #ffffff;
+            width: 380px;
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        /* Aksen dekoratif garis atas */
+        .qr-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #d97706, #fbbf24, #d97706);
+        }
+        .table-badge {
+            display: inline-block;
+            background: #fffbeb;
+            color: #b45309;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+            border: 1px solid #fde68a;
+        }
+        .brand-name {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        h2 {
+            font-size: 22px;
+            color: #0f172a;
+            margin-bottom: 24px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .qr-wrapper {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 16px;
+            display: inline-block;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+            border: 2px solid #f1f5f9;
+            margin-bottom: 24px;
+            position: relative;
+        }
+        .qr-wrapper img {
+            display: block;
+            width: 230px;
+            height: 230px;
+            border-radius: 8px;
+        }
+        .instruction-box {
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .instruction-box svg {
+            width: 20px;
+            height: 20px;
+            fill: #d97706;
+            flex-shrink: 0;
+        }
+        .instruction-text {
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        /* Pengaturan Khusus Saat Dicetak / Disimpan PDF */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0;
+            }
+            .control-panel {
+                display: none !important; /* Panel input & tombol otomatis hilang saat dicetak */
+            }
+            .qr-card {
+                box-shadow: none !important;
+                border: 2px solid #cbd5e1 !important;
+                width: 100% !important;
+                max-width: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Panel Input Nomor Meja & Tombol Cetak -->
+    <div class="control-panel">
+        <label for="tableInput">Nomor Meja:</label>
+        <input type="text" id="tableInput" value="MEJA 01" oninput="updateTableNumber(this.value)">
+        <button class="print-btn" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+            Cetak / Simpan PDF
+        </button>
+    </div>
+
+    <!-- Kartu QR Code -->
+    <div class="qr-card">
+        <div class="brand-name">Modern Cafe</div>
+        <div class="table-badge" id="displayTable">MEJA 01</div>
+        <h2>Scan untuk Memesan</h2>
+        
+        <div class="qr-wrapper">
+            <!-- Ganti parameter data= dengan link tujuan Anda -->
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=https://usahaweb.sitenexs.site/order/klien/modern-cafe/pesan" alt="QR Code Pemesanan">
+        </div>
+
+        <div class="instruction-box">
+            <!-- Ikon Kamera SVG -->
+            <svg viewBox="0 0 24 24"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2m8 3a5 5 0 0 0-5 5a5 5 0 0 0 5 5a5 5 0 0 0 5-5a5 5 0 0 0-5-5m0 2a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3Z"/></svg>
+            <div class="instruction-text">
+                Buka kamera HP, arahkan ke QR Code, lalu ketuk tautan yang muncul.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk mengubah nomor meja secara otomatis saat diketik di input
+        function updateTableNumber(val) {
+            const badge = document.getElementById('displayTable');
+            badge.textContent = val ? val.toUpperCase() : 'MEJA';
+        }
+    </script>
+
+</body>
+</html>
