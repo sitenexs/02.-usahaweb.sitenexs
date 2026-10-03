@@ -682,7 +682,7 @@
                 </div>
             </div>
 
-            <!-- Upload Bukti Pembayaran Wajib -->
+            <!-- Upload Bukti Pembayaran Wajib (Hondling otomatis via JS) -->
             <div id="payment-proof-section" style="margin-bottom: 0.75rem; background: var(--bg-body); padding: 0.6rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle); display: none;">
                 <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.3rem;">
                     <i class="fas fa-upload text-primary"></i> Unggah Bukti Pembayaran <span style="color:var(--danger)">*Wajib</span>
@@ -704,7 +704,7 @@
         </div>
     </div>
 
-        <script>
+    <script>
         // Konfigurasi Supabase (Ganti dengan URL dan Anon Key proyek Anda)
         const SUPABASE_URL = 'https://dsycwzobupboqajrdxnq.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzeWN3em9idXBib3FhanJkeG5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MjM5MTQsImV4cCI6MjEwNjA5OTkxNH0.VlhSGAV9MqkJ6thACkJthiKswEFebY3Ufx-EEkilwvI';
@@ -751,7 +751,6 @@
             renderMenu(currentFilter);
         }
 
-        // Ambil Pengaturan Pembayaran (QRIS & Bank) dari Database
         async function fetchPaymentSettings() {
             const { data, error } = await _supabase.from('settings').select('*');
             if (!error && data) {
@@ -784,7 +783,7 @@
             }
 
             fetchMenuProducts();
-            fetchPaymentSettings(); // Ambil data QRIS & Bank dari admin
+            fetchPaymentSettings();
 
             _supabase
               .channel('public:products')
@@ -1001,12 +1000,19 @@
             document.getElementById('pay-bank').style.display = 'none';
             document.getElementById('pay-kasir').style.display = 'none';
 
-            if (method === 'qris') document.getElementById('pay-qris').style.display = 'block';
-            if (method === 'bank') document.getElementById('pay-bank').style.display = 'block';
-            if (method === 'kasir') document.getElementById('pay-kasir').style.display = 'block';
-
             const proofSection = document.getElementById('payment-proof-section');
-            proofSection.style.display = 'block';
+
+            if (method === 'qris') {
+                document.getElementById('pay-qris').style.display = 'block';
+                proofSection.style.display = 'block';
+            } else if (method === 'bank') {
+                document.getElementById('pay-bank').style.display = 'block';
+                proofSection.style.display = 'block';
+            } else if (method === 'kasir') {
+                document.getElementById('pay-kasir').style.display = 'block';
+                proofSection.style.display = 'none';
+                uploadedPaymentProofBase64 = ''; // Reset bukti pembayaran jika sebelumnya terisi
+            }
         }
 
         function handleProofUpload(event) {
@@ -1024,201 +1030,92 @@
         }
 
         async function checkoutOrder() {
-    const tableNumber =
-        document.getElementById('modal-table-number').value ||
-        document.getElementById('table-number').value;
+            const tableNumber = document.getElementById('modal-table-number').value || document.getElementById('table-number').value;
+            const customerName = (document.getElementById('modal-customer-name').value || document.getElementById('customer-name').value).trim();
 
-    const customerName =
-        (
-            document.getElementById('modal-customer-name').value ||
-            document.getElementById('customer-name').value
-        ).trim();
+            if (!tableNumber) {
+                showToast('Mohon isi nomor meja Anda terlebih dahulu!', 'warning');
+                document.getElementById('modal-table-number').focus();
+                return;
+            }
 
-    // =========================
-    // VALIDASI
-    // =========================
+            if (!customerName) {
+                showToast('Mohon isi nama tamu terlebih dahulu!', 'warning');
+                document.getElementById('modal-customer-name').focus();
+                return;
+            }
 
-    if (!tableNumber) {
-        showToast('Mohon isi nomor meja Anda terlebih dahulu!', 'warning');
-        document.getElementById('modal-table-number').focus();
-        return;
-    }
+            if (!selectedPaymentMethod) {
+                showToast('Silakan pilih metode pembayaran terlebih dahulu!', 'warning');
+                return;
+            }
 
-    if (!customerName) {
-        showToast('Mohon isi nama tamu terlebih dahulu!', 'warning');
-        document.getElementById('modal-customer-name').focus();
-        return;
-    }
+            // Validasi bukti pembayaran hanya jika metode pembayaran BUKAN Kasir
+            if (selectedPaymentMethod !== 'Kasir' && !uploadedPaymentProofBase64) {
+                showToast('Anda wajib mengunggah bukti pembayaran terlebih dahulu!', 'error');
+                return;
+            }
 
-    if (!selectedPaymentMethod) {
-        showToast('Silakan pilih metode pembayaran terlebih dahulu!', 'warning');
-        return;
-    }
+            if (cart.length === 0) {
+                showToast('Keranjang pesanan masih kosong!', 'warning');
+                return;
+            }
 
-    if (!uploadedPaymentProofBase64) {
-        showToast('Anda wajib mengunggah bukti pembayaran terlebih dahulu!', 'error');
-        return;
-    }
+            const btnCheckout = document.getElementById('btn-checkout');
+            btnCheckout.disabled = true;
+            btnCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
 
-    if (cart.length === 0) {
-        showToast('Keranjang pesanan masih kosong!', 'warning');
-        return;
-    }
+            const orderIdFormatted = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+            const totalPrice = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty)), 0);
 
-    // =========================
-    // TOMBOL LOADING
-    // =========================
+            const orderData = {
+                id: orderIdFormatted,
+                table: tableNumber,
+                name: customerName,
+                items: cart,
+                total: totalPrice,
+                paymentMethod: selectedPaymentMethod,
+                paymentProof: uploadedPaymentProofBase64 || null,
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                status: 'Menunggu'
+            };
 
-    const btnCheckout = document.getElementById('btn-checkout');
+            const { data, error } = await _supabase
+                .from('orders')
+                .insert([orderData])
+                .select();
 
-    btnCheckout.disabled = true;
-    btnCheckout.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+            if (error) {
+                showToast('Gagal mengirim: ' + error.message, 'error');
+                btnCheckout.disabled = false;
+                btnCheckout.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
+                return;
+            }
 
-    // =========================
-    // BUAT ID PESANAN
-    // =========================
+            localStorage.setItem('sitenexs_active_order_id', orderIdFormatted);
+            activeOrderId = orderIdFormatted;
 
-    const orderIdFormatted =
-        'ORD-' + Math.floor(1000 + Math.random() * 9000);
+            showActiveTracker(orderIdFormatted, 'Menunggu');
+            showToast('Pesanan berhasil dikirim ke kasir!', 'success');
 
-    // =========================
-    // HITUNG TOTAL
-    // =========================
+            cart = [];
+            selectedPaymentMethod = '';
+            uploadedPaymentProofBase64 = '';
 
-    const totalPrice = cart.reduce(
-        (sum, item) => sum + (Number(item.price) * Number(item.qty)),
-        0
-    );
+            document.getElementById('proof-file-input').value = '';
+            document.getElementById('proof-preview-img').src = '';
+            document.getElementById('proof-preview-container').style.display = 'none';
+            document.getElementById('payment-proof-section').style.display = 'none';
 
-    // =========================
-    // DATA YANG AKAN DIKIRIM
-    // =========================
+            document.querySelectorAll('.payment-card').forEach(card => card.classList.remove('active'));
+            document.querySelectorAll('input[name="payment"]').forEach(input => input.checked = false);
 
-    const orderData = {
-        id: orderIdFormatted,
-        table: tableNumber,
-        name: customerName,
-        items: cart,
-        total: totalPrice,
-        paymentMethod: selectedPaymentMethod,
-        paymentProof: uploadedPaymentProofBase64,
-        time: new Date().toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit'
-        }),
-        status: 'Menunggu'
-    };
+            updateCartBar();
+            closeCartModal();
 
-    // =========================
-    // DEBUG
-    // =========================
-
-    console.log('==============================');
-    console.log('DATA PESANAN AKAN DIKIRIM');
-    console.log('==============================');
-    console.log(orderData);
-    console.log('ID:', orderData.id);
-    console.log('MEJA:', orderData.table);
-    console.log('NAMA:', orderData.name);
-    console.log('ITEM:', orderData.items);
-    console.log('TOTAL:', orderData.total);
-    console.log('PEMBAYARAN:', orderData.paymentMethod);
-    console.log('BUKTI ADA:', !!orderData.paymentProof);
-    console.log('STATUS:', orderData.status);
-    console.log('==============================');
-
-    // =========================
-    // KIRIM KE SUPABASE
-    // =========================
-
-    const { data, error } = await _supabase
-        .from('orders')
-        .insert([orderData])
-        .select();
-
-    // =========================
-    // JIKA ERROR
-    // =========================
-
-    if (error) {
-
-        console.error('==============================');
-        console.error('SUPABASE ERROR');
-        console.error('==============================');
-        console.error('Code:', error.code);
-        console.error('Message:', error.message);
-        console.error('Details:', error.details);
-        console.error('Hint:', error.hint);
-        console.error('Full error:', error);
-        console.error('==============================');
-
-        showToast(
-            'Gagal mengirim: ' + error.message,
-            'error'
-        );
-
-        btnCheckout.disabled = false;
-        btnCheckout.innerHTML =
-            '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
-
-        return;
-    }
-
-    // =========================
-    // BERHASIL
-    // =========================
-
-    console.log('==============================');
-    console.log('PESANAN BERHASIL DISIMPAN');
-    console.log('==============================');
-    console.log(data);
-
-    localStorage.setItem(
-        'sitenexs_active_order_id',
-        orderIdFormatted
-    );
-
-    activeOrderId = orderIdFormatted;
-
-    showActiveTracker(
-        orderIdFormatted,
-        'Menunggu'
-    );
-
-    showToast(
-        'Pesanan berhasil dikirim ke kasir!',
-        'success'
-    );
-
-    // Kosongkan keranjang
-    cart = [];
-
-    selectedPaymentMethod = '';
-    uploadedPaymentProofBase64 = '';
-
-    // Reset bukti pembayaran
-    document.getElementById('proof-file-input').value = '';
-    document.getElementById('proof-preview-img').src = '';
-    document.getElementById('proof-preview-container').style.display = 'none';
-    document.getElementById('payment-proof-section').style.display = 'none';
-
-    // Reset pilihan pembayaran
-    document
-        .querySelectorAll('.payment-card')
-        .forEach(card => card.classList.remove('active'));
-
-    document
-        .querySelectorAll('input[name="payment"]')
-        .forEach(input => input.checked = false);
-
-    updateCartBar();
-    closeCartModal();
-
-    btnCheckout.disabled = false;
-    btnCheckout.innerHTML =
-        '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
-}
+            btnCheckout.disabled = false;
+            btnCheckout.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
+        }
 
         async function callWaiter() {
             const tableNumber = document.getElementById('table-number').value;
@@ -1271,6 +1168,5 @@
             }
         }
     </script>
-
 </body>
 </html>
