@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#173b32">
+    <meta name="theme-color" content="#24364b">
     <meta name="description" content="Laporan pemasukan dan riwayat transaksi Sitenexs Cafe & Resto.">
     <title>Laporan Pemasukan — Sitenexs Cafe & Resto</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,28 +13,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --green: #17483d;
-            --green-dark: #12342c;
-            --green-soft: #edf4ef;
-            --gold: #c9ae72;
-            --paper: #f3f5f2;
-            --ink: #24322b;
-            --muted: #758078;
-            --line: #e5e9e5;
+            --green: #25836a;
+            --green-dark: #263b35;
+            --green-soft: #d9eee7;
+            --gold: #d69a1d;
+            --blue: #2874b8;
+            --blue-soft: #dceafb;
+            --purple: #7650a6;
+            --purple-soft: #e8ddf5;
+            --gold-dark: #946000;
+            --gold-soft: #f7e9c8;
+            --paper: #f0f2f5;
+            --ink: #202b38;
+            --muted: #566273;
+            --line: #d6dce5;
             --white: #fff;
             --red: #a9433b;
             --amber: #936a24;
-            --shadow: 0 5px 18px rgba(28, 43, 34, 0.045);
-            --shadow-hover: 0 12px 28px rgba(28, 43, 34, 0.075);
+            --shadow: 0 2px 8px rgba(35, 52, 73, 0.07);
+            --shadow-hover: 0 5px 14px rgba(35, 52, 73, 0.12);
         }
 
         * { box-sizing: border-box; }
         body {
             min-height: 100vh;
             margin: 0;
-            background:
-                radial-gradient(ellipse at 92% 0%, rgba(220, 229, 220, 0.48), transparent 32rem),
-                var(--paper);
+            background: var(--paper);
             color: var(--ink);
             font-family: "Plus Jakarta Sans", sans-serif;
             font-size: 0.94rem;
@@ -57,11 +61,9 @@
             width: 264px;
             flex-direction: column;
             padding: 1.25rem 0.9rem;
-            color: #f6f4ec;
-            background:
-                radial-gradient(ellipse at 15% 0%, rgba(201, 174, 114, 0.1), transparent 22rem),
-                linear-gradient(180deg, #183b32, #112f28);
-            box-shadow: 8px 0 28px rgba(25, 48, 38, 0.08);
+            color: #fff;
+            background: #17364d;
+            border-right: 1px solid #102a3d;
         }
 
         .brand {
@@ -70,8 +72,8 @@
             gap: 0.75rem;
             min-height: 62px;
             padding: 0 0.55rem 1.1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #f6f4ec;
+            border-bottom: 1px solid #456078;
+            color: #fff;
             font-size: 0.94rem;
             font-weight: 700;
             text-decoration: none;
@@ -85,13 +87,13 @@
             place-items: center;
             border-radius: 0.85rem;
             color: var(--green-dark);
-            background: linear-gradient(145deg, #e7d9b8, var(--gold));
+            background: #e2b449;
         }
 
         .brand-copy { display: grid; gap: 0.05rem; line-height: 1.35; }
         .brand-copy strong { font-size: 0.87rem; letter-spacing: -0.015em; }
         .brand-copy small {
-            color: rgba(242, 244, 236, 0.5);
+            color: #dceaf3;
             font-size: 0.61rem;
             font-weight: 600;
             letter-spacing: 0.12em;
@@ -100,7 +102,7 @@
 
         .nav-label {
             margin: 1.55rem 0.7rem 0.65rem;
-            color: rgba(242, 244, 236, 0.52);
+            color: #d3e2ed;
             font-size: 0.65rem;
             font-weight: 700;
             letter-spacing: 0.12em;
@@ -123,7 +125,7 @@
             gap: 0.75rem;
             padding: 0.65rem 0.8rem;
             border-radius: 0.65rem;
-            color: rgba(242, 244, 236, 0.72);
+            color: #f3f8ff;
             font-size: 0.84rem;
             font-weight: 500;
             text-decoration: none;
@@ -132,37 +134,49 @@
 
         .nav-links a i {
             width: 1.2rem;
-            color: #d5bd89;
             text-align: center;
         }
 
-        .nav-links a:hover,
+        .nav-links li:nth-child(1) a i { color: #ffc857; }
+        .nav-links li:nth-child(2) a i { color: #42d3a5; }
+        .nav-links li:nth-child(3) a i { color: #56b4f7; }
+        .nav-links li:nth-child(4) a i { color: #ff7fa6; }
+
+        .nav-links a:hover {
+            color: #fff;
+            background: #23475f;
+        }
+
         .nav-links a.active {
             color: #fff;
-            background: rgba(255, 255, 255, 0.09);
+            background: #102b40;
+            font-weight: 700;
         }
+
+        .nav-links a.active i { color: #fff; }
 
         .nav-links a.active::before {
             position: absolute;
             inset: 9px auto 9px 0;
             width: 3px;
             border-radius: 0 4px 4px 0;
-            background: #d5bd89;
+            background: #ffc857;
             content: "";
         }
 
         .sidebar-note {
             margin-top: auto;
             padding: 0.9rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #59c9b4;
             border-radius: 0.8rem;
-            color: rgba(242, 244, 236, 0.7);
+            color: #06475a;
+            background: #c9f3ee;
             font-size: 0.73rem;
             line-height: 1.6;
         }
 
-        .sidebar-note i { color: #d5bd89; }
-        .sidebar-note strong { color: #f6f4ec; }
+        .sidebar-note i { color: #42d3a5; }
+        .sidebar-note strong { color: #06475a; }
 
         .main {
             width: calc(100% - 264px);
@@ -187,7 +201,7 @@
             align-items: center;
             gap: 0.45rem;
             margin-bottom: 0.42rem;
-            color: #8b7548;
+            color: var(--purple);
             font-size: 0.66rem;
             font-weight: 700;
             letter-spacing: 0.1em;
@@ -198,7 +212,7 @@
         h1, h2, h3, p { margin-top: 0; }
         h1 {
             margin-bottom: 0.35rem;
-            color: #26362d;
+            color: #26364a;
             font-size: clamp(1.55rem, 2.5vw, 2rem);
             font-weight: 700;
             letter-spacing: -0.04em;
@@ -222,8 +236,8 @@
             border: 0;
             border-radius: 0.7rem;
             color: white;
-            background: linear-gradient(135deg, #1c5547, var(--green));
-            box-shadow: 0 6px 15px rgba(23, 72, 61, 0.15);
+            background: var(--blue);
+            box-shadow: 0 2px 8px rgba(40, 116, 184, 0.24);
             font-size: 0.82rem;
             font-weight: 600;
             white-space: nowrap;
@@ -232,7 +246,7 @@
 
         .button:hover {
             transform: translateY(-1px);
-            box-shadow: 0 9px 20px rgba(23, 72, 61, 0.22);
+            box-shadow: 0 4px 12px rgba(40, 116, 184, 0.32);
         }
 
         .button.secondary {
@@ -242,9 +256,22 @@
             box-shadow: none;
         }
 
+        .filters #apply-button {
+            background: var(--purple);
+            box-shadow: 0 2px 8px rgba(118, 80, 166, 0.24);
+        }
+
+        .filters #apply-button:hover { box-shadow: 0 4px 12px rgba(118, 80, 166, 0.32); }
+
+        .button.export-button {
+            color: #fff;
+            background: #2874b8;
+            box-shadow: 0 2px 8px rgba(40, 116, 184, 0.24);
+        }
+
         .button.danger {
             color: #fff;
-            background: linear-gradient(135deg, #b64d42, #96372f);
+            background: #b83f3a;
             box-shadow: 0 6px 15px rgba(169, 67, 59, 0.16);
         }
 
@@ -287,7 +314,7 @@
             font-size: 0.82rem;
         }
 
-        .date-field input:focus { border-color: #a3b8a8; box-shadow: 0 0 0 3px rgba(23, 72, 61, 0.1); }
+        .date-field input:focus { border-color: #9bb5d0; box-shadow: 0 0 0 3px rgba(75, 120, 168, 0.12); }
 
         .quick-filters {
             display: flex;
@@ -308,9 +335,9 @@
 
         .quick-filter:hover,
         .quick-filter.active {
-            border-color: #c9d8ce;
-            color: var(--green);
-            background: var(--green-soft);
+            border-color: var(--blue);
+            color: #fff;
+            background: var(--blue);
         }
 
         .summary-grid {
@@ -325,9 +352,9 @@
             overflow: hidden;
             min-height: 150px;
             padding: 1.35rem 1.4rem;
-            border: 1px solid rgba(233, 231, 223, 0.9);
+            border: 1px solid #d8dee7;
             border-radius: 0.95rem;
-            background: rgba(255, 255, 255, 0.92);
+            background: #fff;
             box-shadow: var(--shadow);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -337,20 +364,24 @@
         .summary-card.primary {
             color: #f6f4ec;
             border-color: transparent;
-            background:
-                radial-gradient(circle at 92% 10%, rgba(201, 174, 114, 0.2), transparent 9rem),
-                linear-gradient(125deg, #173b32, #1c5547);
+            background: #25836a;
+        }
+
+        .summary-card.transaction-card {
+            border-top: 4px solid var(--blue);
+            background: #fff;
+        }
+
+        .summary-card.average-card {
+            border-top: 4px solid var(--gold);
+            background: #fff;
         }
 
         .summary-card.primary::after {
             position: absolute;
             right: -2.5rem;
             bottom: -4rem;
-            width: 10rem;
-            height: 10rem;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 50%;
-            box-shadow: 0 0 0 1rem rgba(255, 255, 255, 0.035);
+            display: none;
             content: "";
         }
 
@@ -363,7 +394,7 @@
             font-weight: 500;
         }
 
-        .summary-card.primary .summary-label { color: rgba(246, 244, 236, 0.72); }
+        .summary-card.primary .summary-label { color: #fff; }
 
         .summary-icon {
             display: grid;
@@ -371,19 +402,29 @@
             height: 2rem;
             place-items: center;
             border-radius: 0.65rem;
-            color: var(--green);
-            background: var(--green-soft);
+            color: #fff;
+            background: var(--green);
+        }
+
+        .transaction-card .summary-icon {
+            color: #fff;
+            background: var(--blue);
+        }
+
+        .average-card .summary-icon {
+            color: #fff;
+            background: var(--gold-dark);
         }
 
         .summary-card.primary .summary-icon {
-            color: #e6d3aa;
-            background: rgba(255, 255, 255, 0.1);
+            color: #253343;
+            background: #f2c75c;
         }
 
         .summary-value {
             display: block;
             margin-top: 0.7rem;
-            color: #26362d;
+            color: #26364a;
             font-size: clamp(1.45rem, 2.6vw, 2rem);
             font-weight: 700;
             letter-spacing: -0.045em;
@@ -398,7 +439,7 @@
             font-size: 0.72rem;
         }
 
-        .summary-card.primary .summary-caption { color: rgba(246, 244, 236, 0.66); }
+        .summary-card.primary .summary-caption { color: #f4fff9; }
 
         .content-grid {
             display: grid;
@@ -409,12 +450,27 @@
 
         .content-grid > .panel:first-child { grid-column: span 1; }
 
+        .panel-payments > .panel-heading .summary-icon {
+            color: #fff;
+            background: var(--purple);
+        }
+
+        .panel-trend > .panel-heading .summary-icon {
+            color: #fff;
+            background: var(--blue);
+        }
+
+        .panel-products > .panel-heading .summary-icon {
+            color: #fff;
+            background: var(--gold-dark);
+        }
+
         .panel {
             min-width: 0;
             padding: 1.3rem;
-            border: 1px solid rgba(233, 231, 223, 0.9);
+            border: 1px solid #d8dee7;
             border-radius: 0.95rem;
-            background: rgba(255, 255, 255, 0.92);
+            background: #fff;
             box-shadow: var(--shadow);
         }
 
@@ -428,7 +484,7 @@
 
         .panel-heading h2 {
             margin-bottom: 0.15rem;
-            color: #26362d;
+            color: #26364a;
             font-size: 1rem;
             font-weight: 700;
             letter-spacing: -0.025em;
@@ -476,14 +532,14 @@
             align-items: end;
             overflow: hidden;
             border-radius: 0.55rem 0.55rem 0.2rem 0.2rem;
-            background: #f3f2ed;
+            background: #e2e6ec;
         }
 
         .chart-bar {
             width: 100%;
             min-height: 3px;
             border-radius: 0.55rem 0.55rem 0.15rem 0.15rem;
-            background: linear-gradient(180deg, #7ea08b, #17483d);
+            background: var(--blue);
             transition: height 0.3s ease;
         }
 
@@ -502,10 +558,22 @@
         }
 
         .payment-row {
+            --payment-accent: var(--blue);
+            --payment-tint: var(--blue-soft);
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
             gap: 0.5rem 0.75rem;
             align-items: center;
+        }
+
+        .payment-row:nth-child(3n + 2) {
+            --payment-accent: var(--purple);
+            --payment-tint: var(--purple-soft);
+        }
+
+        .payment-row:nth-child(3n) {
+            --payment-accent: var(--gold-dark);
+            --payment-tint: var(--gold-soft);
         }
 
         .payment-name {
@@ -523,8 +591,10 @@
             height: 0.58rem;
             flex: 0 0 auto;
             border-radius: 50%;
-            background: #54806c;
+            background: var(--blue);
         }
+
+        .payment-dot { background: var(--payment-accent); }
 
         .payment-total {
             color: #29372f;
@@ -537,14 +607,15 @@
             height: 6px;
             overflow: hidden;
             border-radius: 999px;
-            background: #f0efe9;
+            background: var(--payment-tint);
         }
 
         .payment-progress span {
             display: block;
             height: 100%;
             border-radius: inherit;
-            background: linear-gradient(90deg, #91ad99, #17483d);
+            background: var(--payment-accent);
+            transition: width 0.3s ease;
         }
 
         .product-ranking {
@@ -572,7 +643,7 @@
         }
 
         .product-ranking-qty {
-            color: var(--green);
+            color: var(--gold-dark);
             font-size: 0.77rem;
             font-weight: 700;
             white-space: nowrap;
@@ -591,7 +662,7 @@
             height: 100%;
             min-width: 3px;
             border-radius: inherit;
-            background: linear-gradient(90deg, #c9ae72, #17483d);
+            background: var(--purple);
             transition: width 0.3s ease;
         }
 
@@ -609,7 +680,7 @@
         }
         tbody tr:last-child td { border-bottom: 0; }
         tbody tr:hover td { background: #f8faf7; }
-        td.money { color: var(--green); font-weight: 700; white-space: nowrap; }
+        td.money { color: var(--blue); font-weight: 700; white-space: nowrap; }
         .status {
             display: inline-flex;
             padding: 0.25rem 0.55rem;
@@ -619,6 +690,8 @@
             font-size: 0.67rem;
             font-weight: 700;
         }
+
+        .summary-icon, .panel-heading .summary-icon { flex: 0 0 auto; }
         .table-message { padding: 2.25rem 1rem; color: var(--muted); text-align: center; }
         .table-message i { display: block; margin-bottom: 0.65rem; color: #ad9a70; font-size: 1.35rem; }
         .panel-empty {
@@ -651,15 +724,15 @@
             gap: 1.25rem;
             margin-top: 1rem;
             padding: 1.15rem 1.25rem;
-            border: 1px solid #dfe8e0;
+            border: 1px solid #dfe5ed;
             border-radius: 1rem;
-            background: #fbfdfb;
+            background: #fbfcfe;
             box-shadow: var(--shadow);
         }
 
         .danger-zone h2 {
             margin: 0 0 0.25rem;
-            color: var(--green);
+            color: #3d5874;
             font-size: 0.94rem;
         }
 
@@ -682,7 +755,7 @@
             box-shadow: 0 24px 80px rgba(25, 35, 29, 0.24);
         }
 
-        .reset-dialog::backdrop { background: rgba(15, 25, 20, 0.56); backdrop-filter: blur(3px); }
+        .reset-dialog::backdrop { background: rgba(15, 25, 20, 0.72); }
 
         .reset-dialog-content { padding: 1.4rem; }
 
@@ -730,7 +803,7 @@
             font-size: 0.85rem;
         }
 
-        .reset-dialog input:focus { border-color: #a3b8a8; box-shadow: 0 0 0 3px rgba(23, 72, 61, 0.1); }
+        .reset-dialog input:focus { border-color: #9bb5d0; box-shadow: 0 0 0 3px rgba(75, 120, 168, 0.12); }
 
         .reset-dialog-actions {
             display: flex;
@@ -753,6 +826,8 @@
             .sidebar { width: 230px; }
             .main { width: calc(100% - 230px); margin-left: 230px; padding: 1.1rem; }
             .content-grid { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .summary-card.primary { grid-column: 1 / -1; }
             .content-grid > .panel:first-child,
             .content-grid > .panel:nth-child(2),
             .content-grid > .panel:nth-child(3) { grid-column: 1; }
@@ -787,7 +862,7 @@
                 place-items: center;
                 border: 1px solid var(--line);
                 border-radius: 0.7rem;
-                color: var(--green);
+                color: var(--blue);
                 background: #fff;
             }
             .page-header { align-items: flex-start; gap: 0.75rem; padding: 0.2rem 0 1rem; }
@@ -893,12 +968,12 @@
                 <strong class="summary-value" id="total-revenue">Rp0</strong>
                 <div class="summary-caption" id="revenue-period">Periode yang dipilih</div>
             </article>
-            <article class="summary-card">
+            <article class="summary-card transaction-card">
                 <div class="summary-label"><span class="summary-icon"><i class="fas fa-receipt"></i></span> Pesanan selesai</div>
                 <strong class="summary-value" id="completed-count">0</strong>
                 <div class="summary-caption">Transaksi berstatus selesai</div>
             </article>
-            <article class="summary-card">
+            <article class="summary-card average-card">
                 <div class="summary-label"><span class="summary-icon"><i class="fas fa-chart-simple"></i></span> Rata-rata transaksi</div>
                 <strong class="summary-value" id="average-order">Rp0</strong>
                 <div class="summary-caption">Per pesanan selesai</div>
@@ -906,7 +981,7 @@
         </section>
 
         <section class="content-grid">
-            <article class="panel">
+            <article class="panel panel-trend">
                 <div class="panel-heading">
                     <div>
                         <h2>Tren pemasukan harian</h2>
@@ -916,7 +991,7 @@
                 </div>
                 <div class="chart" id="revenue-chart" aria-label="Grafik pemasukan harian"></div>
             </article>
-            <article class="panel">
+            <article class="panel panel-payments">
                 <div class="panel-heading">
                     <div>
                         <h2>Metode pembayaran</h2>
@@ -926,7 +1001,7 @@
                 </div>
                 <ul class="payment-list" id="payment-breakdown"></ul>
             </article>
-            <article class="panel product-panel">
+            <article class="panel panel-products product-panel">
                 <div class="panel-heading">
                     <div>
                         <h2>Produk terlaris</h2>
@@ -944,7 +1019,7 @@
                     <h2>Riwayat transaksi selesai</h2>
                     <p id="transaction-caption">Pesanan selesai pada periode yang dipilih</p>
                 </div>
-                <button class="button secondary" id="export-button" type="button" onclick="exportReport()"><i class="fas fa-file-arrow-down"></i> Ekspor CSV</button>
+                <button class="button export-button" id="export-button" type="button" onclick="exportReport()"><i class="fas fa-file-arrow-down"></i> Ekspor CSV</button>
             </div>
             <div class="table-wrap">
                 <table>
