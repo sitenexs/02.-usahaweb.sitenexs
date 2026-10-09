@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#173b32">
+    <meta name="description" content="Laporan pemasukan dan riwayat transaksi Sitenexs Cafe & Resto.">
+    <title>Laporan Pemasukan — Sitenexs Cafe & Resto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --green: #17483d;
+            --green-dark: #12342c;
+            --green-soft: #edf4ef;
+            --gold: #c9ae72;
+            --paper: #f7f6f2;
+            --ink: #27342c;
+            --muted: #737b74;
+            --line: #e9e7df;
+            --white: #fff;
+            --red: #a9433b;
+            --amber: #936a24;
+            --shadow: 0 8px 24px rgba(45, 48, 38, 0.055);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(ellipse at 90% 0%, rgba(231, 222, 198, 0.28), transparent 30rem),
+                var(--paper);
+            color: var(--ink);
+            font-family: "Plus Jakarta Sans", sans-serif;
+            font-size: 0.94rem;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button, input, select { font: inherit; }
+        button { cursor: pointer; }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 20;
+            display: flex;
+            width: 250px;
+            flex-direction: column;
+            padding: 1.15rem 0.85rem;
+            color: #f6f4ec;
+            background: linear-gradient(180deg, #173b32, #12342c);
+            box-shadow: 10px 0 34px rgba(25, 48, 38, 0.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-height: 54px;
+            padding: 0 0.55rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f6f4ec;
+            font-size: 0.94rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 2.45rem;
+            height: 2.45rem;
+            place-items: center;
+            border-radius: 0.8rem;
+            color: var(--green-dark);
+            background: linear-gradient(145deg, #e7d9b8, var(--gold));
+        }
+
+        .nav-label {
+            margin: 1.35rem 0.7rem 0.55rem;
+            color: rgba(242, 244, 236, 0.52);
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: grid;
+            gap: 0.4rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-links a {
+            display: flex;
+            min-height: 44px;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.8rem;
+            border-radius: 0.7rem;
+            color: rgba(242, 244, 236, 0.72);
+            font-size: 0.84rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a i {
+            width: 1.2rem;
+            color: #d5bd89;
+            text-align: center;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.11);
+        }
+
+        .sidebar-note {
+            margin-top: auto;
+            padding: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.8rem;
+            color: rgba(242, 244, 236, 0.7);
+            font-size: 0.73rem;
+            line-height: 1.6;
+        }
+
+        .sidebar-note i { color: #d5bd89; }
+
+        .main {
+            width: calc(100% - 250px);
+            max-width: 1600px;
+            min-width: 0;
+            margin-left: 250px;
+            padding: clamp(1.25rem, 3vw, 2.5rem);
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 1.35rem;
+            padding: 1.55rem 1.7rem;
+            border: 1px solid rgba(233, 231, 223, 0.9);
+            border-radius: 1.1rem;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: var(--shadow);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 0.3rem;
+            color: #957a43;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        h1, h2, h3, p { margin-top: 0; }
+        h1 {
+            margin-bottom: 0.25rem;
+            color: #26362d;
+            font-size: clamp(1.35rem, 2.3vw, 1.8rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            line-height: 1.3;
+        }
+
+        .page-header p {
+            max-width: 650px;
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .button {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            padding: 0.65rem 1rem;
+            border: 0;
+            border-radius: 0.7rem;
+            color: white;
+            background: linear-gradient(135deg, #1c5547, var(--green));
+            box-shadow: 0 6px 15px rgba(23, 72, 61, 0.15);
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 9px 20px rgba(23, 72, 61, 0.22);
+        }
+
+        .button.secondary {
+            border: 1px solid var(--line);
+            color: #445047;
+            background: #fff;
+            box-shadow: none;
+        }
+
+        .button:disabled { cursor: wait; opacity: 0.65; }
+
+        .filters {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.1rem;
+            padding: 1rem;
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: var(--shadow);
+        }
+
+        .date-field {
+            display: grid;
+            min-width: 150px;
+            gap: 0.3rem;
+        }
+
+        .date-field label {
+            color: var(--muted);
+            font-size: 0.73rem;
+            font-weight: 600;
+        }
+
+        .date-field input {
+            min-height: 42px;
+            padding: 0.55rem 0.65rem;
+            border: 1px solid var(--line);
+            border-radius: 0.65rem;
+            outline: none;
+            color: var(--ink);
+            background: #fbfaf7;
+            font-size: 0.82rem;
+        }
+
+        .date-field input:focus { border-color: #a3b8a8; box-shadow: 0 0 0 3px rgba(23, 72, 61, 0.1); }
+
+        .quick-filters {
+            display: flex;
+            gap: 0.4rem;
+            margin-left: auto;
+        }
+
+        .quick-filter {
+            min-height: 40px;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--line);
+            border-radius: 0.65rem;
+            color: #536057;
+            background: #fff;
+            font-size: 0.77rem;
+            font-weight: 600;
+        }
+
+        .quick-filter:hover,
+        .quick-filter.active {
+            border-color: #c9d8ce;
+            color: var(--green);
+            background: var(--green-soft);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 140px;
+            padding: 1.25rem 1.35rem;
+            border: 1px solid rgba(233, 231, 223, 0.9);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card.primary {
+            color: #f6f4ec;
+            border-color: transparent;
+            background:
+                radial-gradient(circle at 92% 10%, rgba(201, 174, 114, 0.2), transparent 9rem),
+                linear-gradient(125deg, #173b32, #1c5547);
+        }
+
+        .summary-card.primary::after {
+            position: absolute;
+            right: -2.5rem;
+            bottom: -4rem;
+            width: 10rem;
+            height: 10rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+            box-shadow: 0 0 0 1rem rgba(255, 255, 255, 0.035);
+            content: "";
+        }
+
+        .summary-label {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .summary-card.primary .summary-label { color: rgba(246, 244, 236, 0.72); }
+
+        .summary-icon {
+            display: grid;
+            width: 2rem;
+            height: 2rem;
+            place-items: center;
+            border-radius: 0.65rem;
+            color: var(--green);
+            background: var(--green-soft);
+        }
+
+        .summary-card.primary .summary-icon {
+            color: #e6d3aa;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-value {
+            display: block;
+            margin-top: 0.7rem;
+            color: #26362d;
+            font-size: clamp(1.45rem, 2.6vw, 2rem);
+            font-weight: 700;
+            letter-spacing: -0.045em;
+            line-height: 1.25;
+        }
+
+        .summary-card.primary .summary-value { color: #fff; }
+
+        .summary-caption {
+            margin-top: 0.25rem;
+            color: var(--muted);
+            font-size: 0.72rem;
+        }
+
+        .summary-card.primary .summary-caption { color: rgba(246, 244, 236, 0.66); }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.8fr);
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .panel {
+            min-width: 0;
+            padding: 1.25rem;
+            border: 1px solid rgba(233, 231, 223, 0.9);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: var(--shadow);
+        }
+
+        .panel-heading {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .panel-heading h2 {
+            margin-bottom: 0.15rem;
+            color: #26362d;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .panel-heading p {
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 0.75rem;
+        }
+
+        .chart {
+            display: flex;
+            height: 225px;
+            align-items: stretch;
+            gap: clamp(0.3rem, 1.5vw, 0.85rem);
+            padding: 1rem 0.25rem 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .chart-day {
+            display: flex;
+            min-width: 0;
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            justify-content: end;
+            gap: 0.55rem;
+        }
+
+        .chart-amount {
+            max-width: 100%;
+            overflow: hidden;
+            color: var(--muted);
+            font-size: 0.62rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chart-track {
+            display: flex;
+            width: min(100%, 44px);
+            height: 145px;
+            align-items: end;
+            overflow: hidden;
+            border-radius: 0.55rem 0.55rem 0.2rem 0.2rem;
+            background: #f3f2ed;
+        }
+
+        .chart-bar {
+            width: 100%;
+            min-height: 3px;
+            border-radius: 0.55rem 0.55rem 0.15rem 0.15rem;
+            background: linear-gradient(180deg, #7ea08b, #17483d);
+            transition: height 0.3s ease;
+        }
+
+        .chart-label {
+            color: #646e66;
+            font-size: 0.68rem;
+            font-weight: 600;
+        }
+
+        .payment-list {
+            display: grid;
+            gap: 0.8rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .payment-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.5rem 0.75rem;
+            align-items: center;
+        }
+
+        .payment-name {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            gap: 0.55rem;
+            color: #48544b;
+            font-size: 0.79rem;
+            font-weight: 500;
+        }
+
+        .payment-dot {
+            width: 0.58rem;
+            height: 0.58rem;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: #54806c;
+        }
+
+        .payment-total {
+            color: #29372f;
+            font-size: 0.79rem;
+            font-weight: 700;
+        }
+
+        .payment-progress {
+            grid-column: 1 / -1;
+            height: 6px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #f0efe9;
+        }
+
+        .payment-progress span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #91ad99, #17483d);
+        }
+
+        .table-panel { margin-top: 1rem; }
+        .table-wrap { overflow-x: auto; border: 1px solid #eeece5; border-radius: 0.8rem; }
+        table { width: 100%; min-width: 650px; border-collapse: collapse; text-align: left; font-size: 0.78rem; }
+        th, td { padding: 0.8rem 0.9rem; border-bottom: 1px solid #eeece5; vertical-align: middle; }
+        th {
+            color: #737b74;
+            background: #f8f7f3;
+            font-size: 0.67rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        tbody tr:last-child td { border-bottom: 0; }
+        tbody tr:hover td { background: #fbfaf7; }
+        td.money { color: var(--green); font-weight: 700; white-space: nowrap; }
+        .status {
+            display: inline-flex;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            color: #34714c;
+            background: #e7f2e9;
+            font-size: 0.67rem;
+            font-weight: 700;
+        }
+        .table-message { padding: 2.25rem 1rem; color: var(--muted); text-align: center; }
+        .table-message i { display: block; margin-bottom: 0.65rem; color: #ad9a70; font-size: 1.35rem; }
+        .notice {
+            display: none;
+            margin-bottom: 1rem;
+            padding: 0.8rem 1rem;
+            border: 1px solid #eddbb7;
+            border-radius: 0.8rem;
+            color: #76591f;
+            background: #fff9eb;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+        .notice.error { border-color: #efd4ce; color: #8c3c34; background: #fff5f1; }
+        .notice.show { display: block; }
+        .loading { opacity: 0.58; pointer-events: none; }
+        .menu-button, .mobile-close, .overlay { display: none; }
+
+        @media (max-width: 1100px) {
+            .content-grid { grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr); }
+            .main { padding: 1.4rem; }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar { width: 230px; }
+            .main { width: calc(100% - 230px); margin-left: 230px; padding: 1.1rem; }
+            .content-grid { grid-template-columns: 1fr; }
+            .payment-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 680px) {
+            .sidebar {
+                width: min(290px, 86vw);
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 19;
+                display: block;
+                visibility: hidden;
+                background: rgba(15, 25, 20, 0.45);
+                opacity: 0;
+                transition: opacity 0.2s ease, visibility 0.2s ease;
+            }
+            .overlay.show { visibility: visible; opacity: 1; }
+            .main { width: 100%; margin: 0; padding: 0.85rem; }
+            .menu-button {
+                display: grid;
+                width: 2.45rem;
+                height: 2.45rem;
+                flex: 0 0 auto;
+                place-items: center;
+                border: 1px solid var(--line);
+                border-radius: 0.7rem;
+                color: var(--green);
+                background: #fff;
+            }
+            .page-header { align-items: flex-start; gap: 0.75rem; padding: 1rem; }
+            .page-heading { display: flex; align-items: flex-start; gap: 0.7rem; }
+            .page-header > .button { min-width: 42px; padding: 0.6rem; font-size: 0; }
+            .page-header > .button i { font-size: 0.9rem; }
+            .page-header p { font-size: 0.79rem; line-height: 1.6; }
+            .filters { align-items: stretch; padding: 0.8rem; }
+            .date-field { min-width: 0; flex: 1 1 calc(50% - 0.5rem); }
+            .filters > .button { flex: 1 1 100%; }
+            .quick-filters { width: 100%; margin: 0; }
+            .quick-filter { flex: 1; padding-inline: 0.35rem; font-size: 0.7rem; }
+            .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
+            .summary-card { min-height: 120px; padding: 0.95rem; }
+            .summary-card.primary { grid-column: 1 / -1; }
+            .summary-value { font-size: clamp(1.3rem, 6vw, 1.8rem); }
+            .summary-label { font-size: 0.72rem; }
+            .panel { padding: 1rem; }
+            .payment-list { grid-template-columns: 1fr; }
+            .chart { height: 205px; }
+            .chart-track { height: 125px; }
+        }
+
+        @media (max-width: 360px) {
+            .main { padding-inline: 0.65rem; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .summary-card.primary { grid-column: auto; }
+            .page-header { flex-wrap: wrap; }
+            .page-header > .button { width: 100%; font-size: 0.8rem; }
+            .page-header > .button i { font-size: 0.8rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="nav-overlay" onclick="toggleNavigation()"></div>
+    <aside class="sidebar" id="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark"><i class="fas fa-utensils"></i></span>
+            <span>Sitenexs Cafe & Resto</span>
+        </a>
+        <p class="nav-label">Navigasi</p>
+        <ul class="nav-links">
+            <li><a href="admin.html"><i class="fas fa-boxes-stacked"></i> Kelola Produk</a></li>
+            <li><a href="kasir.html"><i class="fas fa-cash-register"></i> Kasir & Pelayan</a></li>
+            <li><a class="active" href="pemasukan.html" aria-current="page"><i class="fas fa-chart-line"></i> Laporan Pemasukan</a></li>
+            <li><a href="index.html" target="_blank" rel="noopener"><i class="fas fa-store"></i> Menu Pelanggan</a></li>
+        </ul>
+        <div class="sidebar-note"><i class="fas fa-circle-info"></i> Pemasukan dihitung dari pesanan dengan status <strong>Selesai</strong>.</div>
+    </aside>
+
+    <main class="main" id="main-content">
+        <header class="page-header">
+            <div class="page-heading">
+                <button class="menu-button" type="button" onclick="toggleNavigation()" aria-label="Buka navigasi"><i class="fas fa-bars"></i></button>
+                <div>
+                    <span class="eyebrow"><i class="fas fa-chart-pie"></i> Dashboard / Keuangan</span>
+                    <h1>Laporan Pemasukan</h1>
+                    <p>Ringkasan transaksi selesai, pemasukan, dan metode pembayaran dalam periode pilihan.</p>
+                </div>
+            </div>
+            <button class="button" id="refresh-button" type="button" onclick="loadReport()"><i class="fas fa-rotate"></i> Perbarui Data</button>
+        </header>
+
+        <div class="notice" id="report-notice" role="status" aria-live="polite"></div>
+
+        <section class="filters" aria-label="Filter periode laporan">
+            <div class="date-field">
+                <label for="date-from">Dari tanggal</label>
+                <input id="date-from" type="date">
+            </div>
+            <div class="date-field">
+                <label for="date-to">Sampai tanggal</label>
+                <input id="date-to" type="date">
+            </div>
+            <button class="button" id="apply-button" type="button" onclick="applyDateRange()"><i class="fas fa-filter"></i> Terapkan</button>
+            <div class="quick-filters" aria-label="Pilihan periode cepat">
+                <button class="quick-filter" type="button" onclick="setQuickRange(7, this)">7 hari</button>
+                <button class="quick-filter" type="button" onclick="setQuickRange(30, this)">30 hari</button>
+                <button class="quick-filter active" type="button" onclick="setMonthRange(this)">Bulan ini</button>
+            </div>
+        </section>
+
+        <section class="summary-grid" aria-label="Ringkasan pemasukan">
+            <article class="summary-card primary">
+                <div class="summary-label"><span class="summary-icon"><i class="fas fa-wallet"></i></span> Total pemasukan</div>
+                <strong class="summary-value" id="total-revenue">Rp0</strong>
+                <div class="summary-caption" id="revenue-period">Periode yang dipilih</div>
+            </article>
+            <article class="summary-card">
+                <div class="summary-label"><span class="summary-icon"><i class="fas fa-receipt"></i></span> Pesanan selesai</div>
+                <strong class="summary-value" id="completed-count">0</strong>
+                <div class="summary-caption">Transaksi berstatus selesai</div>
+            </article>
+            <article class="summary-card">
+                <div class="summary-label"><span class="summary-icon"><i class="fas fa-chart-simple"></i></span> Rata-rata transaksi</div>
+                <strong class="summary-value" id="average-order">Rp0</strong>
+                <div class="summary-caption">Per pesanan selesai</div>
+            </article>
+        </section>
+
+        <section class="content-grid">
+            <article class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Tren pemasukan harian</h2>
+                        <p>7 hari terakhir dalam periode terpilih</p>
+                    </div>
+                    <span class="summary-icon"><i class="fas fa-chart-column"></i></span>
+                </div>
+                <div class="chart" id="revenue-chart" aria-label="Grafik pemasukan harian"></div>
+            </article>
+            <article class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Metode pembayaran</h2>
+                        <p>Rincian transaksi selesai</p>
+                    </div>
+                    <span class="summary-icon"><i class="fas fa-credit-card"></i></span>
+                </div>
+                <ul class="payment-list" id="payment-breakdown"></ul>
+            </article>
+        </section>
+
+        <section class="panel table-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Riwayat transaksi selesai</h2>
+                    <p id="transaction-caption">Pesanan selesai pada periode yang dipilih</p>
+                </div>
+                <button class="button secondary" id="export-button" type="button" onclick="exportReport()"><i class="fas fa-file-arrow-down"></i> Ekspor CSV</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal & waktu</th>
+                            <th>ID Pesanan</th>
+                            <th>Meja / pelanggan</th>
+                            <th>Pembayaran</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-body">
+                        <tr><td class="table-message" colspan="6"><i class="fas fa-circle-notch fa-spin"></i>Memuat laporan...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const currency = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+        let allOrders = [];
+        let reportOrders = [];
+        let rangeStart = '';
+        let rangeEnd = '';
+
+        function dateInputValue(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatCurrency(value) {
+            return currency.format(Number(value) || 0).replace(/\u00a0/g, ' ');
+        }
+
+        function formatDateTime(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return 'Tanggal tidak tercatat';
+            return new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            }).format(date);
+        }
+
+        function showNotice(message, isError = false) {
+            const notice = document.getElementById('report-notice');
+            notice.textContent = message;
+            notice.className = `notice show${isError ? ' error' : ''}`;
+        }
+
+        function hideNotice() {
+            const notice = document.getElementById('report-notice');
+            notice.textContent = '';
+            notice.className = 'notice';
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[char]);
+        }
+
+        function parseOrderDate(order) {
+            if (!order.created_at) return null;
+            const value = new Date(order.created_at);
+            return Number.isNaN(value.getTime()) ? null : value;
+        }
+
+        function setDateInputs(start, end) {
+            rangeStart = start;
+            rangeEnd = end;
+            document.getElementById('date-from').value = start;
+            document.getElementById('date-to').value = end;
+        }
+
+        function applyDateRange() {
+            const start = document.getElementById('date-from').value;
+            const end = document.getElementById('date-to').value;
+            if (!start || !end) {
+                showNotice('Silakan pilih tanggal awal dan tanggal akhir laporan.', true);
+                return;
+            }
+            if (start > end) {
+                showNotice('Tanggal awal tidak boleh melewati tanggal akhir.', true);
+                return;
+            }
+            rangeStart = start;
+            rangeEnd = end;
+            document.querySelectorAll('.quick-filter').forEach(button => button.classList.remove('active'));
+            hideNotice();
+            renderReport();
+        }
+
+        function setQuickRange(days, button) {
+            const end = new Date();
+            const start = new Date();
+            start.setDate(start.getDate() - (days - 1));
+            setDateInputs(dateInputValue(start), dateInputValue(end));
+            setActiveQuickFilter(button);
+            hideNotice();
+            renderReport();
+        }
+
+        function setMonthRange(button) {
+            const today = new Date();
+            setDateInputs(dateInputValue(new Date(today.getFullYear(), today.getMonth(), 1)), dateInputValue(today));
+            setActiveQuickFilter(button);
+            hideNotice();
+            renderReport();
+        }
+
+        function setActiveQuickFilter(button) {
+            document.querySelectorAll('.quick-filter').forEach(item => item.classList.remove('active'));
+            button.classList.add('active');
+        }
+
+        async function loadReport() {
+            const refreshButton = document.getElementById('refresh-button');
+            const main = document.getElementById('main-content');
+            refreshButton.disabled = true;
+            main.classList.add('loading');
+            hideNotice();
+            try {
+                const pageSize = 500;
+                const orders = [];
+                let offset = 0;
+                while (true) {
+                    const { data, error } = await db
+                        .from('orders')
+                        .select('id, table, name, total, paymentMethod, status, time, created_at')
+                        .order('created_at', { ascending: false, nullsFirst: false })
+                        .range(offset, offset + pageSize - 1);
+                    if (error) throw error;
+                    orders.push(...(data || []));
+                    if (!data || data.length < pageSize) break;
+                    offset += pageSize;
+                }
+                allOrders = orders;
+                renderReport();
+                const undated = allOrders.filter(order => order.status === 'Selesai' && !parseOrderDate(order)).length;
+                if (undated) {
+                    showNotice(`${undated} pesanan selesai tidak memiliki waktu pencatatan, sehingga tidak dapat dimasukkan ke laporan berdasarkan tanggal.`);
+                }
+            } catch (error) {
+                console.error('Gagal memuat laporan pemasukan:', error);
+                const missingTimestamp = error.code === '42703' && error.message?.includes('created_at');
+                if (missingTimestamp) {
+                    showNotice('Kolom tanggal transaksi belum tersedia. Jalankan supabase_add_order_created_at.sql di Supabase SQL Editor, lalu muat ulang laporan.', true);
+                } else {
+                    showNotice(`Laporan gagal dimuat: ${error.message || 'Terjadi kesalahan saat mengambil data.'}`, true);
+                }
+                const tableMessage = missingTimestamp
+                    ? 'Tambahkan kolom created_at di Supabase untuk menampilkan laporan berdasarkan tanggal.'
+                    : 'Data laporan tidak dapat dimuat. Periksa koneksi dan konfigurasi database.';
+                document.getElementById('transactions-body').innerHTML =
+                    `<tr><td class="table-message" colspan="6"><i class="fas fa-triangle-exclamation"></i>${tableMessage}</td></tr>`;
+            } finally {
+                refreshButton.disabled = false;
+                main.classList.remove('loading');
+            }
+        }
+
+        function getOrdersInRange() {
+            const start = new Date(`${rangeStart}T00:00:00`);
+            const end = new Date(`${rangeEnd}T23:59:59.999`);
+            return allOrders.filter(order => {
+                const date = parseOrderDate(order);
+                return date && date >= start && date <= end;
+            });
+        }
+
+        function renderReport() {
+            const periodOrders = getOrdersInRange();
+            reportOrders = periodOrders.filter(order => order.status === 'Selesai');
+            const total = reportOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            const average = reportOrders.length ? total / reportOrders.length : 0;
+
+            document.getElementById('total-revenue').textContent = formatCurrency(total);
+            document.getElementById('completed-count').textContent = reportOrders.length.toLocaleString('id-ID');
+            document.getElementById('average-order').textContent = formatCurrency(average);
+            document.getElementById('revenue-period').textContent = `${formatShortDate(rangeStart)} – ${formatShortDate(rangeEnd)}`;
+            document.getElementById('transaction-caption').textContent =
+                `${reportOrders.length.toLocaleString('id-ID')} transaksi selesai pada periode yang dipilih`;
+
+            renderChart(reportOrders);
+            renderPaymentBreakdown(reportOrders);
+            renderTransactions(reportOrders);
+        }
+
+        function formatShortDate(dateString) {
+            const date = new Date(`${dateString}T00:00:00`);
+            if (Number.isNaN(date.getTime())) return dateString;
+            return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+        }
+
+        function renderChart(orders) {
+            const chart = document.getElementById('revenue-chart');
+            const end = new Date(`${rangeEnd}T00:00:00`);
+            const start = new Date(`${rangeStart}T00:00:00`);
+            const firstDay = new Date(Math.max(start.getTime(), end.getTime() - 6 * 24 * 60 * 60 * 1000));
+            const dayCount = Math.floor((end - firstDay) / (24 * 60 * 60 * 1000)) + 1;
+            const days = Array.from({ length: dayCount }, (_, index) => {
+                const date = new Date(firstDay);
+                date.setDate(date.getDate() + index);
+                const key = dateInputValue(date);
+                const total = orders.reduce((sum, order) => {
+                    const orderDate = parseOrderDate(order);
+                    return orderDate && dateInputValue(orderDate) === key ? sum + (Number(order.total) || 0) : sum;
+                }, 0);
+                return { date, total };
+            });
+            const max = Math.max(...days.map(day => day.total), 1);
+            chart.innerHTML = days.map(day => {
+                const height = day.total ? Math.max(7, (day.total / max) * 100) : 2;
+                const label = new Intl.DateTimeFormat('id-ID', { weekday: 'short' }).format(day.date);
+                return `<div class="chart-day" title="${escapeHtml(formatShortDate(dateInputValue(day.date)))} — ${escapeHtml(formatCurrency(day.total))}">
+                    <span class="chart-amount">${day.total ? escapeHtml(formatCurrency(day.total)) : '—'}</span>
+                    <div class="chart-track"><span class="chart-bar" style="height:${height}%"></span></div>
+                    <span class="chart-label">${escapeHtml(label)}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderPaymentBreakdown(orders) {
+            const list = document.getElementById('payment-breakdown');
+            if (!orders.length) {
+                list.innerHTML = '<li class="table-message">Belum ada transaksi selesai pada periode ini.</li>';
+                return;
+            }
+            const totals = new Map();
+            orders.forEach(order => {
+                const method = order.paymentMethod || 'Tidak dicatat';
+                totals.set(method, (totals.get(method) || 0) + (Number(order.total) || 0));
+            });
+            const max = Math.max(...totals.values(), 1);
+            list.innerHTML = [...totals.entries()]
+                .sort((a, b) => b[1] - a[1])
+                .map(([method, value]) => `<li class="payment-row">
+                    <span class="payment-name"><span class="payment-dot"></span>${escapeHtml(method)}</span>
+                    <span class="payment-total">${escapeHtml(formatCurrency(value))}</span>
+                    <span class="payment-progress"><span style="width:${Math.max(2, value / max * 100)}%"></span></span>
+                </li>`).join('');
+        }
+
+        function renderTransactions(orders) {
+            const tbody = document.getElementById('transactions-body');
+            if (!orders.length) {
+                tbody.innerHTML = '<tr><td class="table-message" colspan="6"><i class="fas fa-receipt"></i>Belum ada transaksi selesai pada periode ini.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = orders
+                .slice()
+                .sort((a, b) => (parseOrderDate(b)?.getTime() || 0) - (parseOrderDate(a)?.getTime() || 0))
+                .map(order => `<tr>
+                    <td>${escapeHtml(formatDateTime(order.created_at))}</td>
+                    <td>${escapeHtml(order.id)}</td>
+                    <td>Meja ${escapeHtml(order.table)}${order.name ? ` · ${escapeHtml(order.name)}` : ''}</td>
+                    <td>${escapeHtml(order.paymentMethod || 'Tidak dicatat')}</td>
+                    <td class="money">${escapeHtml(formatCurrency(order.total))}</td>
+                    <td><span class="status">Selesai</span></td>
+                </tr>`).join('');
+        }
+
+        function csvCell(value) {
+            let text = String(value ?? '');
+            if (/^[=+\-@]/.test(text)) text = `'${text}`;
+            return `"${text.replace(/"/g, '""')}"`;
+        }
+
+        function exportReport() {
+            if (!reportOrders.length) {
+                showNotice('Tidak ada transaksi selesai untuk diekspor pada periode ini.');
+                return;
+            }
+            const rows = [
+                ['Tanggal', 'ID Pesanan', 'Meja', 'Nama', 'Metode Pembayaran', 'Total', 'Status'],
+                ...reportOrders.map(order => [
+                    formatDateTime(order.created_at),
+                    order.id,
+                    order.table,
+                    order.name,
+                    order.paymentMethod || 'Tidak dicatat',
+                    Number(order.total) || 0,
+                    order.status
+                ])
+            ];
+            const csv = '\ufeff' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `laporan-pemasukan-${rangeStart}-${rangeEnd}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function toggleNavigation() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('nav-overlay').classList.toggle('show');
+        }
+
+        const today = new Date();
+        setDateInputs(dateInputValue(new Date(today.getFullYear(), today.getMonth(), 1)), dateInputValue(today));
+        loadReport();
+    </script>
+</body>
+</html>
