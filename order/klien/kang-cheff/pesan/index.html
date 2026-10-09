@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Sitenexs">
+    <meta name="language" content="id-ID">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Sistem pemesanan menu digital Sitenexs untuk pelanggan agar dapat memesan makanan dan minuman secara cepat dan mudah.">
+    <meta name="keywords" content="pesan menu online, self order, order makanan, menu digital, restoran, cafe, pemesanan online">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="canonical" href="https://sitenexs.site/Order/pesan/">
+    <title>Pesan Menu — Sitenexs Self-Order</title>
+    <meta property="og:title" content="Pesan Menu — Sitenexs Self-Order">
+    <meta property="og:description" content="Pesan makanan dan minuman secara digital dengan sistem self-order Sitenexs yang cepat, modern, dan mudah digunakan.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sitenexs.site/Order/pesan/">
+    
+    <link rel="icon" type="image/png" href="https://sitenexs.site/assets/favicon/favicon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      window.GA_MEASUREMENT_ID = 'G-FY8W3CJKFL';
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', window.GA_MEASUREMENT_ID);
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FY8W3CJKFL"></script>
+    
+    <!-- CDN Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-subtle: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-full: 9999px;
+            --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -4px rgba(15, 23, 42, 0.06);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-size: 0.825rem;
+            padding-bottom: 6rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Toast Notification Container */
+        #toast-container {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 90%;
+            max-width: 380px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #ffffff;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            pointer-events: auto;
+            animation: slideInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            font-size: 0.775rem;
+            font-weight: 500;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+
+        .toast i { font-size: 1.1rem; }
+        .toast.success i { color: var(--success); }
+        .toast.error i { color: var(--danger); }
+        .toast.warning i { color: var(--warning); }
+        .toast.info i { color: var(--primary); }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOutUp {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-25px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .shake-element {
+            animation: shake 0.4s ease-in-out;
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.85rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-brand h2 {
+            font-size: 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
+        }
+
+        .header-brand p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+        }
+
+        .guide-btn {
+            background: var(--primary-light);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            color: var(--primary);
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .guide-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0.85rem;
+        }
+        
+        /* Banner Meja & Nama */
+        .order-meta-box {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .order-meta-box div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 0.4rem 0.6rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition);
+        }
+
+        .order-meta-box div:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .order-meta-box span {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--text-muted);
+            font-size: 0.725rem;
+            font-weight: 600;
+        }
+
+        .order-meta-box input {
+            width: 48px;
+            padding: 0.2rem;
+            text-align: center;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.825rem;
+            outline: none;
+            transition: var(--transition);
+            background: #f8fafc;
+        }
+
+        .order-meta-box input[type="text"] {
+            width: 100px;
+            text-align: left;
+            padding-left: 0.4rem;
+        }
+
+        /* Kategori Filter */
+        .category-scroll {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-btn {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            padding: 0.45rem 0.9rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cat-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .cat-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        .section-title {
+            font-size: 0.925rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.85rem;
+        }
+
+        .menu-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: #cbd5e1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .menu-clickable {
+            cursor: pointer;
+        }
+
+        .menu-img-wrapper {
+            position: relative;
+            height: 125px;
+            width: 100%;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+
+        .menu-img {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .menu-card:hover .menu-img {
+            transform: scale(1.06);
+        }
+
+        .menu-body {
+            padding: 0.75rem;
+            padding-bottom: 0.4rem;
+        }
+
+        .menu-title {
+            font-size: 0.825rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .menu-price {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text-main);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        /* Floating Bars */
+        .floating-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-subtle);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .call-waiter-btn {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fef3c7;
+            padding: 0.5rem 0.9rem;
+            border-radius: var(--radius-full);
+            font-size: 0.725rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .call-waiter-btn:hover {
+            background: #fef3c7;
+            transform: scale(1.03);
+        }
+
+        /* Modal Smooth Animation */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            max-height: 88vh;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 1.25rem 1rem 1.5rem 1rem;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 -20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .preview-img-container {
+            width: 100%;
+            height: 170px;
+            background: #f8fafc;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+        }
+
+        #detail-img, #confirm-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.775rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* Form & Payment Options */
+        .payment-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin: 0.6rem 0;
+        }
+
+        .payment-card {
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 0.4rem;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.725rem;
+            font-weight: 600;
+            background: #fff;
+            transition: var(--transition);
+        }
+
+        .payment-card input {
+            display: none;
+        }
+
+        .payment-card.active, .payment-card:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.1);
+        }
+
+        .payment-detail-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem;
+            margin-top: 0.6rem;
+            font-size: 0.75rem;
+            display: none;
+            text-align: center;
+            color: var(--text-muted);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .qr-img {
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+            margin: 0.4rem auto;
+            display: block;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: #fff;
+            padding: 4px;
+        }
+        
+        /* Live Status Tracker */
+        .tracker-box {
+            background: #fff;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Step Guide Styles */
+        .guide-step {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            margin-bottom: 0.85rem;
+        }
+
+        .guide-step-num {
+            background: var(--primary-light);
+            color: var(--primary);
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .guide-step-text h5 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.1rem;
+        }
+
+        .guide-step-text p {
+            font-size: 0.725rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Refined ordering experience */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #eff6ff;
+            --bg-body: #f4f7fb;
+            --text-main: #14213d;
+            --border-subtle: #e6ebf2;
+            --radius-md: 1rem;
+            --radius-lg: 1.5rem;
+            --shadow-sm: 0 4px 16px rgba(15, 23, 42, 0.045);
+            --shadow-md: 0 16px 38px rgba(15, 23, 42, 0.1);
+        }
+
+        body {
+            background:
+                radial-gradient(ellipse at 8% 0%, rgba(219, 234, 254, 0.75), transparent 33rem),
+                var(--bg-body);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            padding-bottom: 7rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            padding: 1rem max(1.25rem, calc((100% - 1120px) / 2));
+            background: rgba(255, 255, 255, 0.88);
+            border-bottom-color: rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.035);
+        }
+
+        .header-brand h2 {
+            font-size: 1.05rem;
+            letter-spacing: -0.04em;
+        }
+
+        .header-brand h2 i {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: grid;
+            place-items: center;
+            border-radius: 0.75rem;
+            background: linear-gradient(145deg, #2563eb, #60a5fa);
+            color: #fff !important;
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.24);
+        }
+
+        .header-brand p {
+            font-size: 0.75rem;
+            margin: 0.2rem 0 0 2.7rem;
+        }
+
+        .guide-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .container {
+            width: min(1120px, calc(100% - 2.5rem));
+            max-width: none;
+            padding: 2rem 0 3rem;
+        }
+
+        .welcome-panel {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            padding: clamp(1.75rem, 5vw, 3.5rem);
+            margin-bottom: 1.5rem;
+            border-radius: 1.75rem;
+            color: #fff;
+            background:
+                radial-gradient(circle at 86% 18%, rgba(147, 197, 253, 0.32), transparent 15rem),
+                linear-gradient(120deg, #102b62 0%, #1d4ed8 58%, #3b82f6 100%);
+            box-shadow: 0 22px 50px rgba(30, 64, 175, 0.2);
+        }
+
+        .welcome-panel::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            width: 19rem;
+            height: 19rem;
+            right: -7rem;
+            bottom: -13rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            box-shadow: 0 0 0 2rem rgba(255, 255, 255, 0.045), 0 0 0 4rem rgba(255, 255, 255, 0.035);
+        }
+
+        .welcome-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: #dbeafe;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .welcome-panel h1 {
+            max-width: 700px;
+            margin-bottom: 0.75rem;
+            font-size: clamp(1.8rem, 4.5vw, 3.15rem);
+            font-weight: 800;
+            letter-spacing: -0.055em;
+            line-height: 1.1;
+        }
+
+        .welcome-panel p {
+            max-width: 570px;
+            color: #dbeafe;
+            font-size: clamp(0.92rem, 1.7vw, 1.05rem);
+            line-height: 1.7;
+        }
+
+        .order-meta-box {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .order-meta-box > div {
+            min-width: 0;
+            padding: 0.85rem 1rem;
+            border-radius: 0.85rem;
+            background: #f8fafc;
+            border-color: transparent;
+        }
+
+        .order-meta-box span {
+            gap: 0.55rem;
+            font-size: 0.82rem;
+        }
+
+        .order-meta-box span i {
+            color: var(--primary);
+        }
+
+        .order-meta-box input,
+        .order-meta-box input[type="text"] {
+            width: min(55%, 180px);
+            min-width: 90px;
+            padding: 0.55rem 0.7rem;
+            border-color: #e2e8f0;
+            background: #fff;
+            font-size: 0.9rem;
+        }
+
+        .category-scroll {
+            gap: 0.65rem;
+            margin-bottom: 1.5rem;
+            padding: 0.15rem 0.1rem 0.7rem;
+        }
+
+        .cat-btn {
+            padding: 0.7rem 1.1rem;
+            border-radius: 0.8rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .cat-btn.active {
+            background: #1d4ed8;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.2);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.035em;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 0.3rem;
+            height: 1.35rem;
+            border-radius: 1rem;
+            background: linear-gradient(180deg, #60a5fa, #2563eb);
+        }
+
+        .menu-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1.1rem;
+        }
+
+        .menu-card {
+            border-color: rgba(226, 232, 240, 0.9);
+            border-radius: 1.1rem;
+            background: #fff;
+            box-shadow: 0 5px 18px rgba(15, 23, 42, 0.045);
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            border-color: #bfdbfe;
+            box-shadow: 0 18px 34px rgba(30, 64, 175, 0.12);
+        }
+
+        .menu-img-wrapper {
+            height: 190px;
+            background: linear-gradient(135deg, #eff6ff, #f8fafc);
+        }
+
+        .menu-body {
+            padding: 1rem 1rem 0.6rem;
+        }
+
+        .menu-title {
+            min-height: 2.5em;
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+
+        .menu-price {
+            color: #1d4ed8;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .menu-card > div:last-child {
+            padding: 0 1rem 1rem !important;
+        }
+
+        .menu-card .btn {
+            min-height: 2.6rem;
+            border-radius: 0.75rem;
+            font-size: 0.82rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 9px 20px rgba(37, 99, 235, 0.28);
+        }
+
+        .floating-actions {
+            left: 50%;
+            width: min(1120px, calc(100% - 2.5rem));
+            bottom: 1rem;
+            padding: 0.75rem 1rem;
+            transform: translateX(-50%);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14);
+        }
+
+        .call-waiter-btn {
+            padding: 0.7rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .modal-content {
+            border-radius: 1.4rem 1.4rem 0 0;
+        }
+
+        :focus-visible {
+            outline: 3px solid rgba(59, 130, 246, 0.5);
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 900px) {
+            .menu-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .menu-img-wrapper {
+                height: 170px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                width: min(100% - 1.25rem, 480px);
+                padding-top: 1rem;
+            }
+
+            header {
+                padding: 0.8rem 1rem;
+            }
+
+            .welcome-panel {
+                padding: 1.6rem 1.3rem;
+                margin-bottom: 1rem;
+                border-radius: 1.25rem;
+            }
+
+            .welcome-panel h1 {
+                max-width: 400px;
+            }
+
+            .order-meta-box {
+                gap: 0.55rem;
+                padding: 0.65rem;
+                margin-bottom: 1.35rem;
+                border-radius: 1rem;
+            }
+
+            .order-meta-box > div {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.45rem;
+                padding: 0.7rem;
+            }
+
+            .order-meta-box input,
+            .order-meta-box input[type="text"] {
+                width: 100%;
+                min-width: 0;
+                text-align: left;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.7rem;
+            }
+
+            .menu-img-wrapper {
+                height: clamp(115px, 34vw, 175px);
+            }
+
+            .menu-body {
+                padding: 0.75rem 0.75rem 0.45rem;
+            }
+
+            .menu-title {
+                font-size: 0.82rem;
+            }
+
+            .menu-price {
+                font-size: 0.9rem;
+            }
+
+            .menu-card > div:last-child {
+                padding: 0 0.75rem 0.75rem !important;
+            }
+
+            .menu-card .btn {
+                min-height: 2.4rem;
+                font-size: 0.75rem;
+            }
+
+            .floating-actions {
+                width: calc(100% - 1rem);
+                bottom: 0.5rem;
+                padding: 0.65rem;
+                border-radius: 0.9rem;
+            }
+
+            .call-waiter-btn {
+                padding: 0.65rem 0.75rem;
+                font-size: 0.72rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Premium dining finish */
+        :root {
+            --primary: #17483d;
+            --primary-dark: #10382f;
+            --primary-light: #edf4ef;
+            --bg-body: #f7f6f2;
+            --text-main: #202923;
+            --text-muted: #737b74;
+            --border-subtle: #e9e7df;
+            --success: #38805e;
+        }
+
+        body {
+            background:
+                radial-gradient(ellipse at 4% 0%, rgba(231, 222, 198, 0.3), transparent 30rem),
+                #f7f6f2;
+        }
+
+        header {
+            background: rgba(250, 249, 246, 0.9);
+            border-bottom-color: rgba(226, 222, 211, 0.8);
+        }
+
+        .header-brand h2 {
+            color: #202923;
+        }
+
+        .header-brand h2 i {
+            background: linear-gradient(145deg, #17483d, #34715f);
+            box-shadow: 0 6px 16px rgba(23, 72, 61, 0.2);
+        }
+
+        .guide-btn {
+            color: #17483d;
+            border-color: #e9e7df;
+        }
+
+        .guide-btn:hover {
+            background: #17483d;
+            color: #fff;
+        }
+
+        .welcome-panel {
+            background:
+                radial-gradient(circle at 88% 20%, rgba(198, 166, 105, 0.23), transparent 17rem),
+                linear-gradient(118deg, #142d28 0%, #17483d 58%, #256453 100%);
+            box-shadow: 0 24px 52px rgba(28, 60, 48, 0.18);
+        }
+
+        .welcome-panel::after {
+            border-color: rgba(223, 196, 143, 0.26);
+            box-shadow: 0 0 0 2rem rgba(223, 196, 143, 0.055), 0 0 0 4rem rgba(223, 196, 143, 0.035);
+        }
+
+        .welcome-eyebrow {
+            color: #e6d3aa;
+        }
+
+        .welcome-eyebrow i {
+            color: #d5b879;
+        }
+
+        .welcome-panel h1 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 700;
+            letter-spacing: -0.035em;
+        }
+
+        .welcome-panel p {
+            color: rgba(245, 244, 235, 0.8);
+        }
+
+        .order-meta-box {
+            background: rgba(255, 255, 255, 0.84);
+            border-color: #e9e7df;
+            box-shadow: 0 8px 24px rgba(50, 54, 43, 0.045);
+        }
+
+        .order-meta-box > div {
+            background: #faf9f6;
+        }
+
+        .order-meta-box span i,
+        .order-meta-box input {
+            color: #17483d;
+        }
+
+        .order-meta-box input:focus {
+            border-color: #b79b62;
+            box-shadow: 0 0 0 3px rgba(183, 155, 98, 0.12);
+        }
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: #e9e7df;
+            color: #626b63;
+        }
+
+        .cat-btn:hover {
+            border-color: #b79b62;
+            color: #17483d;
+        }
+
+        .cat-btn.active {
+            background: #17483d;
+            border-color: #17483d;
+            box-shadow: 0 7px 18px rgba(23, 72, 61, 0.18);
+        }
+
+        .section-title::before {
+            background: linear-gradient(180deg, #d5bd89, #a88b53);
+        }
+
+        .menu-card {
+            border-color: #ece9e1;
+            box-shadow: 0 7px 22px rgba(45, 48, 38, 0.055);
+        }
+
+        .menu-card:hover {
+            border-color: #d7c69f;
+            box-shadow: 0 18px 35px rgba(45, 59, 46, 0.12);
+        }
+
+        .menu-img-wrapper {
+            background: #eeece5;
+        }
+
+        .menu-img {
+            transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease;
+        }
+
+        .menu-card:hover .menu-img {
+            filter: saturate(1.06);
+        }
+
+        .menu-title {
+            color: #27342c;
+        }
+
+        .menu-price {
+            color: #17483d;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1c5547, #17483d);
+            box-shadow: 0 6px 15px rgba(23, 72, 61, 0.17);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #17483d, #10382f);
+            box-shadow: 0 9px 20px rgba(23, 72, 61, 0.23);
+        }
+
+        .floating-actions {
+            background: rgba(250, 249, 246, 0.96);
+            border-color: rgba(226, 222, 211, 0.95);
+            box-shadow: 0 14px 38px rgba(33, 43, 36, 0.15);
+        }
+
+        .call-waiter-btn {
+            color: #815f21;
+            border-color: #eee3c9;
+            background: #fbf6e9;
+        }
+
+        .call-waiter-btn:hover {
+            background: #f4ebd5;
+        }
+
+        .modal-content {
+            border: 1px solid rgba(233, 231, 223, 0.9);
+            box-shadow: 0 -18px 55px rgba(20, 35, 29, 0.18);
+        }
+
+        :focus-visible {
+            outline-color: rgba(183, 155, 98, 0.7);
+        }
+
+        @media (max-width: 640px) {
+            .welcome-panel h1 {
+                font-size: clamp(1.85rem, 8vw, 2.45rem);
+                line-height: 1.13;
+            }
+
+            .menu-card {
+                border-radius: 0.95rem;
+            }
+        }
+
+        /* Softer, more comfortable reading */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.7;
+            color: #344139;
+            letter-spacing: 0.005em;
+            text-rendering: optimizeLegibility;
+        }
+
+        h1, h2, h3, h4, h5, button, input {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .welcome-panel h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(1.8rem, 4.2vw, 2.8rem);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 1.2;
+        }
+
+        .welcome-eyebrow {
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+        }
+
+        .welcome-panel p {
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .header-brand h2,
+        .section-title {
+            letter-spacing: -0.025em;
+        }
+
+        .header-brand p {
+            font-size: 0.8rem;
+            line-height: 1.55;
+        }
+
+        .order-meta-box span {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .order-meta-box input,
+        .order-meta-box input[type="text"] {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .cat-btn {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .menu-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.55;
+            letter-spacing: 0;
+        }
+
+        .menu-price {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .menu-card .btn,
+        .call-waiter-btn,
+        .floating-actions .btn {
+            font-size: 0.84rem;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+
+        .guide-step-text p {
+            font-size: 0.82rem;
+            line-height: 1.65;
+        }
+
+        .guide-step-text h5 {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .modal-content {
+            line-height: 1.65;
+        }
+
+        @media (max-width: 640px) {
+            .welcome-panel h1 {
+                font-size: clamp(1.8rem, 7.5vw, 2.25rem);
+                line-height: 1.23;
+            }
+
+            .welcome-panel p {
+                font-size: 0.96rem;
+                line-height: 1.75;
+            }
+
+            .menu-title {
+                font-size: 0.88rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <header>
+        <div class="header-brand">
+            <h2><i class="fas fa-utensils" style="color: var(--primary);"></i> Sitenexs Cafe & Resto</h2>
+            <p>Sistem Self-Order Digital Meja Anda</p>
+        </div>
+        <button class="guide-btn" onclick="openGuideModal()" title="Panduan Pemesanan">
+            <i class="fas fa-question"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Live Status Tracker -->
+        <div id="active-tracker" style="display: none;" class="tracker-box">
+            <h4 style="font-size: 0.875rem; font-weight: 700; color: var(--primary); margin-bottom: 0.2rem;">
+                <i class="fas fa-clock"></i> Status Pesanan: <span id="track-status-text">Menunggu</span>
+            </h4>
+            <p style="font-size: 0.725rem; color: var(--text-muted);">ID Pesanan: <b id="track-order-id">#---</b></p>
+            <div style="background: var(--border-subtle); height: 6px; width: 100%; margin: 0.75rem 0; border-radius: var(--radius-full); overflow: hidden;">
+                <div id="tracker-bar" style="background: var(--primary); height: 100%; width: 33%; transition: width 0.4s ease; border-radius: var(--radius-full);"></div>
+            </div>
+            <button class="btn btn-secondary" style="font-size: 0.725rem; padding: 0.35rem; width: auto;" onclick="cancelActiveOrder()">Tutup Pelacakan</button>
+        </div>
+
+        <section class="welcome-panel" aria-labelledby="welcome-title">
+            <span class="welcome-eyebrow"><i class="fas fa-sparkles"></i> Pesan langsung dari meja</span>
+            <h1 id="welcome-title">Pilih menu favoritmu, kami siapkan dengan senang hati.</h1>
+            <p>Jelajahi menu, tambahkan ke pesanan, lalu santai. Semuanya bisa dilakukan langsung dari sini.</p>
+        </section>
+
+        <!-- Meta Meja & Nama -->
+        <div class="order-meta-box">
+            <div>
+                <span><i class="fas fa-chair text-primary"></i> Meja <span style="color:var(--danger)">*</span></span>
+                <input type="number" id="table-number" value="" placeholder="No..." min="1" onchange="syncMeta('table')">
+            </div>
+            <div>
+                <span><i class="fas fa-user text-primary"></i> Nama <span style="color:var(--danger)">*</span></span>
+                <input type="text" id="customer-name" placeholder="Nama Anda..." oninput="syncMeta('name')">
+            </div>
+        </div>
+
+        <!-- Kategori Menu Filter -->
+        <div class="category-scroll">
+            <button class="cat-btn active" onclick="filterMenu('all', this)">Semua Menu</button>
+            <button class="cat-btn" onclick="filterMenu('makanan', this)">Makanan Utama</button>
+            <button class="cat-btn" onclick="filterMenu('minuman', this)">Minuman</button>
+            <button class="cat-btn" onclick="filterMenu('snack', this)">Snack / Dessert</button>
+        </div>
+
+        <h3 class="section-title">Daftar Menu Tersedia</h3>
+        <div id="menu-list-container" class="menu-grid">
+            <!-- Produk dirender dinamis -->
+        </div>
+    </div>
+
+    <!-- Floating Bottom Bar -->
+    <div class="floating-actions" id="floating-bar" style="display: flex;">
+        <button class="call-waiter-btn" onclick="callWaiter()">
+            <i class="fas fa-bell"></i> Panggil Pelayan
+        </button>
+        <div id="cart-bar-info" style="display: none; align-items: center; gap: 0.6rem; animation: fadeIn 0.3s ease;">
+            <div style="text-align: right;">
+                <span style="font-size: 0.675rem; color: var(--text-muted); display: block;"><span id="cart-count">0</span> Item</span>
+                <span id="cart-total" style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">Rp 0</span>
+            </div>
+            <button class="btn btn-primary" style="width: auto; padding: 0.45rem 0.9rem; font-size: 0.75rem;" onclick="openCartModal()">Lihat Pesanan</button>
+        </div>
+    </div>
+
+    <!-- Modal Panduan / Instruksi Penggunaan -->
+    <div class="modal" id="guide-modal">
+        <div class="modal-content" style="max-width: 380px; margin: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h3 style="font-size: 1rem; font-weight: 700; display:flex; align-items:center; gap:0.4rem;">
+                    <i class="fas fa-book-open text-primary" style="color:var(--primary);"></i> Panduan Pemesanan
+                </h3>
+                <button onclick="closeGuideModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <div class="guide-step">
+                    <div class="guide-step-num">1</div>
+                    <div class="guide-step-text">
+                        <h5>Isi Nomor Meja & Nama</h5>
+                        <p>Pastikan Anda memasukkan nomor meja tempat Anda duduk dan nama Anda pada kolom di bagian atas.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">2</div>
+                    <div class="guide-step-text">
+                        <h5>Pilih Menu Favorit</h5>
+                        <p>Jelajahi kategori makanan, minuman, atau snack, lalu klik menu untuk melihat detail atau tombol "Tambah".</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">3</div>
+                    <div class="guide-step-text">
+                        <h5>Atur Catatan & Porsi</h5>
+                        <p>Anda bisa menambahkan catatan khusus (misal: "pedas sedang", "tanpa es") sebelum memasukkannya ke keranjang.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="guide-step-num">4</div>
+                    <div class="guide-step-text">
+                        <h5>Checkout & Pembayaran</h5>
+                        <p>Buka keranjang pesanan, pilih metode pembayaran (QRIS, Transfer, atau Kasir), lalu kirim pesanan ke dapur!</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="closeGuideModal()">Mengerti, Mulai Pesan</button>
+        </div>
+    </div>
+
+    <!-- Modal Detail Makanan -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-content" style="max-width: 380px; margin: auto;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 0.2rem;">
+                <button onclick="closeDetailModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="preview-img-container" style="height: 190px;">
+                <img id="detail-img" src="" alt="">
+            </div>
+            <h3 id="detail-title" style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;"></h3>
+            <div id="detail-price" style="font-size: 0.9rem; color: var(--primary); font-weight: 700; margin-bottom: 0.6rem;"></div>
+            <p id="detail-desc" style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 1.2rem; line-height: 1.5;"></p>
+            <button class="btn btn-primary" id="btn-detail-add" style="font-size: 0.775rem; padding: 0.55rem;">
+                <i class="fas fa-plus"></i> Tambah ke Pesanan
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Tambah Menu, Gambar, Qty (+/-) & Catatan -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content" style="max-width: 380px; margin: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="font-size: 1rem; font-weight: 700;">Atur Jumlah Pesanan</h3>
+                <button onclick="closeConfirmModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="preview-img-container" style="height: 150px;">
+                <img id="confirm-img" src="" alt="">
+            </div>
+            
+            <h4 id="confirm-item-name" style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.15rem;"></h4>
+            <div id="confirm-item-price" style="font-size: 0.825rem; color: var(--primary); font-weight: 700; margin-bottom: 0.85rem;"></div>
+
+            <!-- Kontrol Tambah Kurang Qty -->
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 0.85rem;">
+                <span style="font-size: 0.775rem; font-weight: 600;">Jumlah Porsi:</span>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; width: auto;" onclick="adjustPromptQty(-1)"><i class="fas fa-minus"></i></button>
+                    <span id="prompt-qty" style="font-weight: 700; font-size: 0.95rem; width: 20px; text-align: center;">1</span>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; width: auto;" onclick="adjustPromptQty(1)"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.1rem;">
+                <label style="font-size: 0.725rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.3rem;">Catatan Khusus (Opsional):</label>
+                <input type="text" id="item-note" placeholder="Misal: Pedas sedang, tanpa es" style="width: 100%; padding: 0.5rem 0.6rem; font-size: 0.775rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); outline: none; background: #f8fafc;">
+            </div>
+
+            <div style="display: flex; gap: 0.6rem;">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()" style="font-size: 0.775rem;">Batal</button>
+                <button class="btn btn-primary" id="btn-confirm-yes" style="font-size: 0.775rem;">Tambahkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Keranjang & Pembayaran -->
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                <h3 style="font-size: 1.05rem; font-weight: 700;">Detail Pesanan Meja</h3>
+                <button onclick="closeCartModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Input Meja & Nama Diperjelas di dalam Modal Keranjang -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.85rem;">
+                <p style="font-size: 0.725rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <i class="fas fa-info-circle"></i> Mohon lengkapi identitas meja Anda sebelum kirim:
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--text-main); display: block; margin-bottom: 3px; font-weight: 700;"><i class="fas fa-chair text-primary"></i> Nomor Meja <span style="color:var(--danger)">*</span></label>
+                        <input type="number" id="modal-table-number" placeholder="No Meja..." style="width: 100%; padding: 0.45rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 700; color: var(--primary); font-size: 0.8rem; outline: none; background: #fff;" oninput="syncMeta('modal-table')">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--text-main); display: block; margin-bottom: 3px; font-weight: 700;"><i class="fas fa-user text-primary"></i> Nama Tamu <span style="color:var(--danger)">*</span></label>
+                        <input type="text" id="modal-customer-name" placeholder="Nama Anda..." style="width: 100%; padding: 0.45rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 700; font-size: 0.8rem; outline: none; background: #fff;" oninput="syncMeta('modal-name')">
+                    </div>
+                </div>
+            </div>
+
+            <div id="cart-items-container" style="margin-bottom: 0.85rem; max-height: 150px; overflow-y: auto;">
+                <!-- List keranjang -->
+            </div>
+            
+            <div style="margin-bottom: 0.85rem;">
+                <label style="font-size: 0.775rem; font-weight: 700; display: block; margin-bottom: 0.4rem;">Pilih Metode Pembayaran:</label>
+                <div class="payment-options">
+                    <label class="payment-card" onclick="selectPayment('qris')">
+                        <input type="radio" name="payment" value="QRIS">
+                        <i class="fas fa-qrcode" style="font-size: 1.1rem; display: block; margin-bottom: 3px;"></i> QRIS
+                    </label>
+                    <label class="payment-card" onclick="selectPayment('bank')">
+                        <input type="radio" name="payment" value="Bank Transfer">
+                        <i class="fas fa-university" style="font-size: 1.1rem; display: block; margin-bottom: 3px;"></i> Transfer
+                    </label>
+                    <label class="payment-card" onclick="selectPayment('kasir')">
+                        <input type="radio" name="payment" value="Kasir">
+                        <i class="fas fa-cash-register" style="font-size: 1.1rem; display: block; margin-bottom: 3px;"></i> Kasir
+                    </label>
+                </div>
+
+                <!-- QRIS Dinamis dari Admin -->
+                <div id="pay-qris" class="payment-detail-box">
+                    <img id="dynamic-qris-img" src="QR.png" alt="QRIS Code" class="qr-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/130?text=QRIS+Tidak+Tersedia';">
+                    <p style="font-size: 0.725rem; margin-top: 6px;">Scan QRIS di atas menggunakan e-Wallet atau M-Banking Anda.</p>
+                </div>
+                <!-- Bank Transfer Dinamis dari Admin -->
+                <div id="pay-bank" class="payment-detail-box">
+                    <p id="dynamic-bank-info" style="font-size: 0.725rem;">Memuat informasi rekening...</p>
+                </div>
+                <div id="pay-kasir" class="payment-detail-box">
+                    <p style="font-size: 0.725rem;">Silakan lakukan pembayaran langsung ke Kasir setelah pesanan selesai.</p>
+                </div>
+            </div>
+
+            <!-- Upload Bukti Pembayaran -->
+            <div id="payment-proof-section" style="margin-bottom: 0.85rem; background: #f8fafc; padding: 0.7rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-subtle); display: none;">
+                <label style="font-size: 0.725rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.35rem;">
+                    <i class="fas fa-upload text-primary" style="color: var(--primary);"></i> Unggah Bukti Pembayaran <span style="color:var(--danger)">*Wajib</span>
+                </label>
+                <input type="file" id="proof-file-input" accept="image/*" onchange="handleProofUpload(event)" style="font-size: 0.725rem; width: 100%;">
+                <div id="proof-preview-container" style="margin-top: 0.5rem; display: none; text-align: center;">
+                    <img id="proof-preview-img" src="" alt="Bukti Transfer" style="max-height: 110px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); object-fit: contain;">
+                    <p style="font-size: 0.675rem; color: var(--success); margin-top: 3px; font-weight: 600;"><i class="fas fa-check-circle"></i> Bukti berhasil dilampirkan</p>
+                </div>
+            </div>
+
+            <div style="font-weight: 700; font-size: 0.925rem; display: flex; justify-content: space-between; margin-bottom: 1.1rem; border-top: 1px solid var(--border-subtle); padding-top: 0.6rem;">
+                <span>Total Pembayaran:</span>
+                <span id="modal-total" style="color: var(--primary);">Rp 0</span>
+            </div>
+            <button id="btn-checkout" class="btn btn-primary" style="padding: 0.65rem; font-size: 0.825rem;" onclick="checkoutOrder()">
+                <i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let products = [];
+        let cart = [];
+        let selectedPaymentMethod = '';
+        let uploadedPaymentProofBase64 = ''; 
+        let currentFilter = 'all';
+        let activeOrderId = localStorage.getItem('sitenexs_active_order_id') || null;
+        let currentPromptQty = 1;
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let icon = 'fas fa-info-circle';
+            if (type === 'success') icon = 'fas fa-check-circle';
+            if (type === 'error') icon = 'fas fa-exclamation-circle';
+            if (type === 'warning') icon = 'fas fa-bell';
+
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOutUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                setTimeout(() => toast.remove(), 350);
+            }, 3000);
+        }
+
+        async function fetchMenuProducts() {
+            const { data, error } = await _supabase.from('products').select('*');
+            if (error) {
+                console.error('Gagal memuat menu dari Supabase:', error);
+                showToast('Gagal memuat menu dari server.', 'error');
+                return;
+            }
+            products = data || [];
+            renderMenu(currentFilter);
+        }
+
+        async function fetchPaymentSettings() {
+            const { data, error } = await _supabase.from('settings').select('*');
+            if (!error && data) {
+                data.forEach(item => {
+                    if (item.key === 'qris_img' && item.value) {
+                        document.getElementById('dynamic-qris-img').src = item.value;
+                    }
+                    if (item.key === 'bank_info' && item.value) {
+                        document.getElementById('dynamic-bank-info').innerHTML = item.value.replace(/\n/g, '<br>');
+                    }
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTable = localStorage.getItem('sitenexs_table');
+            const savedName = localStorage.getItem('sitenexs_name');
+            if (savedTable) {
+                document.getElementById('table-number').value = savedTable;
+                document.getElementById('modal-table-number').value = savedTable;
+            }
+            if (savedName) {
+                document.getElementById('customer-name').value = savedName;
+                document.getElementById('modal-customer-name').value = savedName;
+            }
+
+            if (!localStorage.getItem('sitenexs_guide_shown')) {
+                openGuideModal();
+                localStorage.setItem('sitenexs_guide_shown', 'true');
+            }
+
+            if (activeOrderId) {
+                checkOrderStatus();
+                setInterval(checkOrderStatus, 3000); 
+            }
+
+            fetchMenuProducts();
+            fetchPaymentSettings();
+
+            _supabase
+              .channel('public:products')
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
+                  fetchMenuProducts();
+              })
+              .subscribe();
+        });
+
+        function openGuideModal() {
+            openModal('guide-modal');
+        }
+
+        function closeGuideModal() {
+            closeModal('guide-modal');
+        }
+
+        function syncMeta(source) {
+            let tableVal = '';
+            let nameVal = '';
+
+            if (source === 'table' || source === 'name') {
+                tableVal = document.getElementById('table-number').value;
+                nameVal = document.getElementById('customer-name').value;
+                document.getElementById('modal-table-number').value = tableVal;
+                document.getElementById('modal-customer-name').value = nameVal;
+            } else {
+                tableVal = document.getElementById('modal-table-number').value;
+                nameVal = document.getElementById('modal-customer-name').value;
+                document.getElementById('table-number').value = tableVal;
+                document.getElementById('customer-name').value = nameVal;
+            }
+
+            localStorage.setItem('sitenexs_table', tableVal);
+            localStorage.setItem('sitenexs_name', nameVal);
+        }
+
+        function renderMenu(category = 'all') {
+            const container = document.getElementById('menu-list-container');
+            container.innerHTML = '';
+            
+            const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: span 2; text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+                        <i class="fas fa-box-open" style="font-size: 1.75rem; margin-bottom: 0.5rem; display: block; color: #cbd5e1;"></i>
+                        Belum ada menu pada kategori ini.
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                container.innerHTML += `
+                    <div class="menu-card">
+                        <div class="menu-clickable" onclick="openDetailModal(${p.id})">
+                            <div class="menu-img-wrapper">
+                                <img src="${p.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80'}" class="menu-img" alt="${p.name}">
+                            </div>
+                            <div class="menu-body">
+                                <div class="menu-title">${p.name}</div>
+                                <div class="menu-price">Rp ${p.price.toLocaleString('id-ID')}</div>
+                            </div>
+                        </div>
+                        <div style="padding: 0 0.75rem 0.75rem 0.75rem;">
+                            <button class="btn btn-primary" onclick="promptAddToCart(${p.id})">
+                                <i class="fas fa-plus"></i> Tambah
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterMenu(cat, btn) {
+            currentFilter = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderMenu(cat);
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function openDetailModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            document.getElementById('detail-img').src = product.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80';
+            document.getElementById('detail-title').innerText = product.name;
+            document.getElementById('detail-price').innerText = 'Rp ' + product.price.toLocaleString('id-ID');
+            document.getElementById('detail-desc').innerText = product.desc || 'Menu lezat pilihan terbaik dari Sitenexs Cafe & Resto.';
+
+            document.getElementById('btn-detail-add').onclick = function() {
+                closeDetailModal();
+                promptAddToCart(id);
+            };
+            openModal('detail-modal');
+        }
+
+        function closeDetailModal() {
+            closeModal('detail-modal');
+        }
+
+        function promptAddToCart(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            currentPromptQty = 1;
+            document.getElementById('prompt-qty').innerText = currentPromptQty;
+            document.getElementById('confirm-img').src = product.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80';
+            document.getElementById('confirm-item-name').innerText = product.name;
+            document.getElementById('confirm-item-price').innerText = 'Rp ' + product.price.toLocaleString('id-ID');
+            document.getElementById('item-note').value = '';
+
+            document.getElementById('btn-confirm-yes').onclick = function() {
+                const note = document.getElementById('item-note').value;
+                addToCartWithQty(id, currentPromptQty, note);
+                closeConfirmModal();
+            };
+            openModal('confirm-modal');
+        }
+
+        function adjustPromptQty(change) {
+            currentPromptQty += change;
+            if (currentPromptQty < 1) currentPromptQty = 1;
+            document.getElementById('prompt-qty').innerText = currentPromptQty;
+        }
+
+        function closeConfirmModal() {
+            closeModal('confirm-modal');
+        }
+
+        function addToCartWithQty(id, qty, note) {
+            const product = products.find(p => p.id === id);
+            const existing = cart.find(item => item.id === id && item.note === note);
+            if (existing) {
+                existing.qty += qty;
+            } else {
+                cart.push({ ...product, qty: qty, note: note });
+            }
+            updateCartBar();
+            showToast(`Berhasil menambahkan ${qty}x ${product.name} ke pesanan.`, 'success');
+        }
+
+        function updateCartQty(index, change) {
+            cart[index].qty += change;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            openCartModal();
+            updateCartBar();
+        }
+
+        function updateCartBar() {
+            const cartBarInfo = document.getElementById('cart-bar-info');
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            if (totalCount > 0) {
+                cartBarInfo.style.display = 'flex';
+                document.getElementById('cart-count').innerText = totalCount;
+                document.getElementById('cart-total').innerText = 'Rp ' + totalPrice.toLocaleString('id-ID');
+            } else {
+                cartBarInfo.style.display = 'none';
+                closeCartModal();
+            }
+        }
+
+        function openCartModal() {
+            const currentTable = localStorage.getItem('sitenexs_table') || '';
+            const currentName = localStorage.getItem('sitenexs_name') || '';
+            document.getElementById('modal-table-number').value = currentTable;
+            document.getElementById('modal-customer-name').value = currentName;
+
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = '';
+            let totalPrice = 0;
+
+            if (cart.length === 0) {
+                closeCartModal();
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                totalPrice += item.price * item.qty;
+                container.innerHTML += `
+                    <div class="cart-item-row">
+                        <div style="flex: 1;">
+                            <strong>${item.name}</strong> ${item.note ? `<br><small style="color:var(--primary); font-weight:600;">Catatan: ${item.note}</small>` : ''}<br>
+                            <small style="color: var(--text-muted);">Rp ${item.price.toLocaleString('id-ID')} x ${item.qty}</small>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <button class="btn btn-secondary" style="padding: 0.15rem 0.45rem; width: auto;" onclick="updateCartQty(${index}, -1)"><i class="fas fa-minus"></i></button>
+                            <span style="font-weight: 700; width: 18px; text-align: center;">${item.qty}</span>
+                            <button class="btn btn-secondary" style="padding: 0.15rem 0.45rem; width: auto;" onclick="updateCartQty(${index}, 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('modal-total').innerText = 'Rp ' + totalPrice.toLocaleString('id-ID');
+            openModal('cart-modal');
+        }
+
+        function closeCartModal() {
+            closeModal('cart-modal');
+        }
+
+        function selectPayment(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-card').forEach(card => card.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.getElementById('pay-qris').style.display = 'none';
+            document.getElementById('pay-bank').style.display = 'none';
+            document.getElementById('pay-kasir').style.display = 'none';
+
+            if (method === 'qris') document.getElementById('pay-qris').style.display = 'block';
+            if (method === 'bank') document.getElementById('pay-bank').style.display = 'block';
+            if (method === 'kasir') document.getElementById('pay-kasir').style.display = 'block';
+
+            const proofSection = document.getElementById('payment-proof-section');
+            if (method === 'kasir') {
+                proofSection.style.display = 'none';
+                uploadedPaymentProofBase64 = '';
+            } else {
+                proofSection.style.display = 'block';
+            }
+        }
+
+        function handleProofUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedPaymentProofBase64 = e.target.result;
+                document.getElementById('proof-preview-img').src = uploadedPaymentProofBase64;
+                document.getElementById('proof-preview-container').style.display = 'block';
+                showToast('Bukti pembayaran berhasil dilampirkan.', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function checkoutOrder() {
+            const tableInputEl = document.getElementById('modal-table-number');
+            const nameInputEl = document.getElementById('modal-customer-name');
+            
+            const tableNumber = tableInputEl.value.trim();
+            const customerName = nameInputEl.value.trim();
+            
+            // Validasi Nomor Meja
+            if (!tableNumber) {
+                showToast('Mohon isi nomor meja Anda terlebih dahulu!', 'warning');
+                tableInputEl.classList.add('shake-element');
+                tableInputEl.focus();
+                setTimeout(() => tableInputEl.classList.remove('shake-element'), 600);
+                return;
+            }
+            
+            // Validasi Nama Tamu
+            if (!customerName) {
+                showToast('Mohon isi nama tamu terlebih dahulu!', 'warning');
+                nameInputEl.classList.add('shake-element');
+                nameInputEl.focus();
+                setTimeout(() => nameInputEl.classList.remove('shake-element'), 600);
+                return;
+            }
+
+            if (!selectedPaymentMethod) {
+                showToast('Silakan pilih metode pembayaran terlebih dahulu!', 'warning');
+                return;
+            }
+            
+            if (selectedPaymentMethod !== 'kasir' && !uploadedPaymentProofBase64) {
+                showToast('Anda wajib mengunggah bukti pembayaran terlebih dahulu!', 'error');
+                return;
+            }
+
+            if (cart.length === 0) return;
+
+            const btnCheckout = document.getElementById('btn-checkout');
+            btnCheckout.disabled = true;
+            btnCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+
+            const orderIdFormatted = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+            const orderPayload = {
+                id: orderIdFormatted,
+                table: tableNumber,
+                name: customerName,
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
+                paymentMethod: selectedPaymentMethod,
+                paymentProof: uploadedPaymentProofBase64 || 'Bayar di Kasir', 
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                status: 'Menunggu'
+            };
+
+            const { error } = await _supabase.from('orders').insert([orderPayload]);
+            
+            if (error) {
+                console.warn('Gagal menyimpan ke tabel Supabase orders:', error);
+                showToast('Gagal mengirim pesanan ke server.', 'error');
+                btnCheckout.disabled = false;
+                btnCheckout.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
+                return;
+            }
+
+            localStorage.setItem('sitenexs_active_order_id', orderIdFormatted);
+            activeOrderId = orderIdFormatted;
+
+            showActiveTracker(orderIdFormatted, 'Menunggu');
+            showToast('Pesanan berhasil dikirim!', 'success');
+            
+            cart = [];
+            selectedPaymentMethod = '';
+            uploadedPaymentProofBase64 = '';
+            
+            document.getElementById('proof-file-input').value = '';
+            document.getElementById('proof-preview-container').style.display = 'none';
+
+            updateCartBar();
+            closeCartModal();
+
+            btnCheckout.disabled = false;
+            btnCheckout.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pesanan ke Kasir';
+        }
+
+        async function callWaiter() {
+            const tableNumber = document.getElementById('table-number').value;
+            if (!tableNumber) {
+                showToast('Mohon isi nomor meja Anda sebelum memanggil pelayan!', 'warning');
+                return;
+            }
+            
+            const callData = { 
+                table: tableNumber, 
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                status: 'Pending'
+            };
+
+            await _supabase.from('calls').insert([callData]);
+            showToast(`Pelayan telah dipanggil ke Meja ${tableNumber}. Mohon tunggu sebentar.`, 'warning');
+        }
+
+        function showActiveTracker(id, status) {
+            document.getElementById('active-tracker').style.display = 'block';
+            document.getElementById('track-order-id').innerText = id;
+            document.getElementById('track-status-text').innerText = status;
+            
+            let progressWidth = '33%';
+            if (status.toLowerCase() === 'diproses') progressWidth = '66%';
+            if (status.toLowerCase() === 'selesai') progressWidth = '100%';
+            document.getElementById('tracker-bar').style.width = progressWidth;
+        }
+
+        async function checkOrderStatus() {
+            if (!activeOrderId) return;
+            
+            const { data } = await _supabase
+                .from('orders')
+                .select('*')
+                .eq('id', activeOrderId)
+                .single();
+
+            if (data) {
+                showActiveTracker(data.id, data.status);
+            }
+        }
+
+        function cancelActiveOrder() {
+            if (confirm('Tutup atau selesaikan pelacakan pesanan ini?')) {
+                document.getElementById('active-tracker').style.display = 'none';
+                localStorage.removeItem('sitenexs_active_order_id');
+                activeOrderId = null;
+                showToast('Pelacakan pesanan ditutup.', 'info');
+            }
+        }
+    </script>
+</body>
+</html>
