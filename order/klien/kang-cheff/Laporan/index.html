@@ -17,14 +17,15 @@
             --green-dark: #12342c;
             --green-soft: #edf4ef;
             --gold: #c9ae72;
-            --paper: #f7f6f2;
-            --ink: #27342c;
-            --muted: #737b74;
-            --line: #e9e7df;
+            --paper: #f3f5f2;
+            --ink: #24322b;
+            --muted: #758078;
+            --line: #e5e9e5;
             --white: #fff;
             --red: #a9433b;
             --amber: #936a24;
-            --shadow: 0 8px 24px rgba(45, 48, 38, 0.055);
+            --shadow: 0 5px 18px rgba(28, 43, 34, 0.045);
+            --shadow-hover: 0 12px 28px rgba(28, 43, 34, 0.075);
         }
 
         * { box-sizing: border-box; }
@@ -32,7 +33,7 @@
             min-height: 100vh;
             margin: 0;
             background:
-                radial-gradient(ellipse at 90% 0%, rgba(231, 222, 198, 0.28), transparent 30rem),
+                radial-gradient(ellipse at 92% 0%, rgba(220, 229, 220, 0.48), transparent 32rem),
                 var(--paper);
             color: var(--ink);
             font-family: "Plus Jakarta Sans", sans-serif;
@@ -43,26 +44,32 @@
 
         button, input, select { font: inherit; }
         button { cursor: pointer; }
+        button:focus-visible, a:focus-visible, input:focus-visible {
+            outline: 3px solid rgba(201, 174, 114, 0.7);
+            outline-offset: 3px;
+        }
 
         .sidebar {
             position: fixed;
             inset: 0 auto 0 0;
             z-index: 20;
             display: flex;
-            width: 250px;
+            width: 264px;
             flex-direction: column;
-            padding: 1.15rem 0.85rem;
+            padding: 1.25rem 0.9rem;
             color: #f6f4ec;
-            background: linear-gradient(180deg, #173b32, #12342c);
-            box-shadow: 10px 0 34px rgba(25, 48, 38, 0.1);
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(201, 174, 114, 0.1), transparent 22rem),
+                linear-gradient(180deg, #183b32, #112f28);
+            box-shadow: 8px 0 28px rgba(25, 48, 38, 0.08);
         }
 
         .brand {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            min-height: 54px;
-            padding: 0 0.55rem 1rem;
+            min-height: 62px;
+            padding: 0 0.55rem 1.1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             color: #f6f4ec;
             font-size: 0.94rem;
@@ -72,16 +79,27 @@
 
         .brand-mark {
             display: grid;
-            width: 2.45rem;
-            height: 2.45rem;
+            width: 2.65rem;
+            height: 2.65rem;
+            flex: 0 0 auto;
             place-items: center;
-            border-radius: 0.8rem;
+            border-radius: 0.85rem;
             color: var(--green-dark);
             background: linear-gradient(145deg, #e7d9b8, var(--gold));
         }
 
+        .brand-copy { display: grid; gap: 0.05rem; line-height: 1.35; }
+        .brand-copy strong { font-size: 0.87rem; letter-spacing: -0.015em; }
+        .brand-copy small {
+            color: rgba(242, 244, 236, 0.5);
+            font-size: 0.61rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
         .nav-label {
-            margin: 1.35rem 0.7rem 0.55rem;
+            margin: 1.55rem 0.7rem 0.65rem;
             color: rgba(242, 244, 236, 0.52);
             font-size: 0.65rem;
             font-weight: 700;
@@ -91,7 +109,7 @@
 
         .nav-links {
             display: grid;
-            gap: 0.4rem;
+            gap: 0.3rem;
             margin: 0;
             padding: 0;
             list-style: none;
@@ -99,11 +117,12 @@
 
         .nav-links a {
             display: flex;
-            min-height: 44px;
+            position: relative;
+            min-height: 46px;
             align-items: center;
             gap: 0.75rem;
             padding: 0.65rem 0.8rem;
-            border-radius: 0.7rem;
+            border-radius: 0.65rem;
             color: rgba(242, 244, 236, 0.72);
             font-size: 0.84rem;
             font-weight: 500;
@@ -120,7 +139,16 @@
         .nav-links a:hover,
         .nav-links a.active {
             color: #fff;
-            background: rgba(255, 255, 255, 0.11);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .nav-links a.active::before {
+            position: absolute;
+            inset: 9px auto 9px 0;
+            width: 3px;
+            border-radius: 0 4px 4px 0;
+            background: #d5bd89;
+            content: "";
         }
 
         .sidebar-note {
@@ -134,13 +162,14 @@
         }
 
         .sidebar-note i { color: #d5bd89; }
+        .sidebar-note strong { color: #f6f4ec; }
 
         .main {
-            width: calc(100% - 250px);
-            max-width: 1600px;
+            width: calc(100% - 264px);
+            max-width: 1720px;
             min-width: 0;
-            margin-left: 250px;
-            padding: clamp(1.25rem, 3vw, 2.5rem);
+            margin-left: 264px;
+            padding: clamp(1.25rem, 3.1vw, 2.75rem);
         }
 
         .page-header {
@@ -148,31 +177,29 @@
             align-items: center;
             justify-content: space-between;
             gap: 1.5rem;
-            margin-bottom: 1.35rem;
-            padding: 1.55rem 1.7rem;
-            border: 1px solid rgba(233, 231, 223, 0.9);
-            border-radius: 1.1rem;
-            background: rgba(255, 255, 255, 0.88);
-            box-shadow: var(--shadow);
+            margin-bottom: 1.4rem;
+            padding: 0.35rem 0 1.35rem;
+            border-bottom: 1px solid #e2e7e1;
         }
 
         .eyebrow {
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
-            margin-bottom: 0.3rem;
-            color: #957a43;
-            font-size: 0.68rem;
+            margin-bottom: 0.42rem;
+            color: #8b7548;
+            font-size: 0.66rem;
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
+        .eyebrow i { font-size: 0.72rem; }
 
         h1, h2, h3, p { margin-top: 0; }
         h1 {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.35rem;
             color: #26362d;
-            font-size: clamp(1.35rem, 2.3vw, 1.8rem);
+            font-size: clamp(1.55rem, 2.5vw, 2rem);
             font-weight: 700;
             letter-spacing: -0.04em;
             line-height: 1.3;
@@ -215,24 +242,31 @@
             box-shadow: none;
         }
 
+        .button.danger {
+            color: #fff;
+            background: linear-gradient(135deg, #b64d42, #96372f);
+            box-shadow: 0 6px 15px rgba(169, 67, 59, 0.16);
+        }
+
+        .button.danger:hover { box-shadow: 0 9px 20px rgba(169, 67, 59, 0.24); }
         .button:disabled { cursor: wait; opacity: 0.65; }
 
         .filters {
             display: flex;
             align-items: end;
             flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-bottom: 1.1rem;
-            padding: 1rem;
+            gap: 0.85rem;
+            margin-bottom: 1.2rem;
+            padding: 1.05rem 1.15rem;
             border: 1px solid var(--line);
-            border-radius: 1rem;
-            background: rgba(255, 255, 255, 0.82);
+            border-radius: 0.9rem;
+            background: rgba(255, 255, 255, 0.94);
             box-shadow: var(--shadow);
         }
 
         .date-field {
             display: grid;
-            min-width: 150px;
+            min-width: 160px;
             gap: 0.3rem;
         }
 
@@ -243,13 +277,13 @@
         }
 
         .date-field input {
-            min-height: 42px;
-            padding: 0.55rem 0.65rem;
+            min-height: 44px;
+            padding: 0.6rem 0.75rem;
             border: 1px solid var(--line);
             border-radius: 0.65rem;
             outline: none;
             color: var(--ink);
-            background: #fbfaf7;
+            background: #fbfcfa;
             font-size: 0.82rem;
         }
 
@@ -262,7 +296,7 @@
         }
 
         .quick-filter {
-            min-height: 40px;
+            min-height: 44px;
             padding: 0.5rem 0.75rem;
             border: 1px solid var(--line);
             border-radius: 0.65rem;
@@ -283,19 +317,22 @@
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
         }
 
         .summary-card {
             position: relative;
             overflow: hidden;
-            min-height: 140px;
-            padding: 1.25rem 1.35rem;
+            min-height: 150px;
+            padding: 1.35rem 1.4rem;
             border: 1px solid rgba(233, 231, 223, 0.9);
-            border-radius: 1rem;
+            border-radius: 0.95rem;
             background: rgba(255, 255, 255, 0.92);
             box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
+        .summary-card:not(.primary):hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 
         .summary-card.primary {
             color: #f6f4ec;
@@ -365,16 +402,18 @@
 
         .content-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.8fr);
+            grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr) minmax(220px, 1fr);
             gap: 1rem;
             align-items: start;
         }
 
+        .content-grid > .panel:first-child { grid-column: span 1; }
+
         .panel {
             min-width: 0;
-            padding: 1.25rem;
+            padding: 1.3rem;
             border: 1px solid rgba(233, 231, 223, 0.9);
-            border-radius: 1rem;
+            border-radius: 0.95rem;
             background: rgba(255, 255, 255, 0.92);
             box-shadow: var(--shadow);
         }
@@ -384,7 +423,7 @@
             align-items: start;
             justify-content: space-between;
             gap: 0.8rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.15rem;
         }
 
         .panel-heading h2 {
@@ -399,6 +438,7 @@
             margin-bottom: 0;
             color: var(--muted);
             font-size: 0.75rem;
+            line-height: 1.55;
         }
 
         .chart {
@@ -507,20 +547,68 @@
             background: linear-gradient(90deg, #91ad99, #17483d);
         }
 
-        .table-panel { margin-top: 1rem; }
-        .table-wrap { overflow-x: auto; border: 1px solid #eeece5; border-radius: 0.8rem; }
+        .product-ranking {
+            display: grid;
+            gap: 0.9rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .product-ranking-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.45rem 0.85rem;
+            align-items: center;
+        }
+
+        .product-ranking-name {
+            overflow: hidden;
+            color: #48544b;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .product-ranking-qty {
+            color: var(--green);
+            font-size: 0.77rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .product-ranking-track {
+            grid-column: 1 / -1;
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #f0efe9;
+        }
+
+        .product-ranking-track span {
+            display: block;
+            height: 100%;
+            min-width: 3px;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #c9ae72, #17483d);
+            transition: width 0.3s ease;
+        }
+
+        .table-panel { margin-top: 1.2rem; }
+        .table-wrap { overflow-x: auto; border: 1px solid #e9ede8; border-radius: 0.75rem; }
         table { width: 100%; min-width: 650px; border-collapse: collapse; text-align: left; font-size: 0.78rem; }
-        th, td { padding: 0.8rem 0.9rem; border-bottom: 1px solid #eeece5; vertical-align: middle; }
+        th, td { padding: 0.9rem 1rem; border-bottom: 1px solid #edf0ec; vertical-align: middle; }
         th {
             color: #737b74;
-            background: #f8f7f3;
+            background: #f7f9f6;
             font-size: 0.67rem;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
         tbody tr:last-child td { border-bottom: 0; }
-        tbody tr:hover td { background: #fbfaf7; }
+        tbody tr:hover td { background: #f8faf7; }
         td.money { color: var(--green); font-weight: 700; white-space: nowrap; }
         .status {
             display: inline-flex;
@@ -533,6 +621,13 @@
         }
         .table-message { padding: 2.25rem 1rem; color: var(--muted); text-align: center; }
         .table-message i { display: block; margin-bottom: 0.65rem; color: #ad9a70; font-size: 1.35rem; }
+        .panel-empty {
+            padding: 1.5rem 0.75rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+            line-height: 1.6;
+            text-align: center;
+        }
         .notice {
             display: none;
             margin-bottom: 1rem;
@@ -549,8 +644,108 @@
         .loading { opacity: 0.58; pointer-events: none; }
         .menu-button, .mobile-close, .overlay { display: none; }
 
+        .danger-zone {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.25rem;
+            margin-top: 1rem;
+            padding: 1.15rem 1.25rem;
+            border: 1px solid #dfe8e0;
+            border-radius: 1rem;
+            background: #fbfdfb;
+            box-shadow: var(--shadow);
+        }
+
+        .danger-zone h2 {
+            margin: 0 0 0.25rem;
+            color: var(--green);
+            font-size: 0.94rem;
+        }
+
+        .danger-zone p {
+            max-width: 720px;
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.76rem;
+            line-height: 1.65;
+        }
+
+        .reset-dialog {
+            width: min(460px, calc(100% - 2rem));
+            padding: 0;
+            overflow: visible;
+            border: 1px solid #e9e1dc;
+            border-radius: 1rem;
+            color: var(--ink);
+            background: #fff;
+            box-shadow: 0 24px 80px rgba(25, 35, 29, 0.24);
+        }
+
+        .reset-dialog::backdrop { background: rgba(15, 25, 20, 0.56); backdrop-filter: blur(3px); }
+
+        .reset-dialog-content { padding: 1.4rem; }
+
+        .reset-dialog-icon {
+            display: grid;
+            width: 2.7rem;
+            height: 2.7rem;
+            margin-bottom: 0.9rem;
+            place-items: center;
+            border-radius: 0.85rem;
+            color: var(--green);
+            background: var(--green-soft);
+        }
+
+        .reset-dialog h2 { margin-bottom: 0.4rem; font-size: 1.08rem; }
+        .reset-dialog p { margin-bottom: 0.8rem; color: var(--muted); font-size: 0.8rem; line-height: 1.65; }
+        .reset-scope {
+            margin: 0.8rem 0;
+            padding: 0.8rem 0.9rem;
+            border: 1px solid #f0e8e3;
+            border-radius: 0.7rem;
+            color: #5d554f;
+            background: #fbf8f6;
+            font-size: 0.76rem;
+            line-height: 1.7;
+        }
+
+        .reset-dialog label {
+            display: block;
+            margin: 1rem 0 0.35rem;
+            color: #48544b;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .reset-dialog input {
+            width: 100%;
+            min-height: 44px;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--line);
+            border-radius: 0.65rem;
+            outline: none;
+            color: var(--ink);
+            background: #fbfaf7;
+            font-size: 0.85rem;
+        }
+
+        .reset-dialog input:focus { border-color: #a3b8a8; box-shadow: 0 0 0 3px rgba(23, 72, 61, 0.1); }
+
+        .reset-dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.55rem;
+            margin-top: 1.15rem;
+        }
+
+        .reset-dialog-actions .button { min-height: 40px; }
+
         @media (max-width: 1100px) {
-            .content-grid { grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr); }
+            .content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .content-grid > .panel:first-child { grid-column: 1 / -1; }
+            .content-grid > .panel:nth-child(2),
+            .content-grid > .panel:nth-child(3) { grid-column: span 1; }
             .main { padding: 1.4rem; }
         }
 
@@ -558,6 +753,9 @@
             .sidebar { width: 230px; }
             .main { width: calc(100% - 230px); margin-left: 230px; padding: 1.1rem; }
             .content-grid { grid-template-columns: 1fr; }
+            .content-grid > .panel:first-child,
+            .content-grid > .panel:nth-child(2),
+            .content-grid > .panel:nth-child(3) { grid-column: 1; }
             .payment-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
@@ -567,6 +765,7 @@
                 transform: translateX(-105%);
                 transition: transform 0.25s ease;
             }
+            .sidebar { width: min(290px, 86vw); }
             .sidebar.open { transform: translateX(0); }
             .overlay {
                 position: fixed;
@@ -579,7 +778,7 @@
                 transition: opacity 0.2s ease, visibility 0.2s ease;
             }
             .overlay.show { visibility: visible; opacity: 1; }
-            .main { width: 100%; margin: 0; padding: 0.85rem; }
+            .main { width: 100%; margin: 0; padding: 1rem 0.85rem 1.5rem; }
             .menu-button {
                 display: grid;
                 width: 2.45rem;
@@ -591,12 +790,12 @@
                 color: var(--green);
                 background: #fff;
             }
-            .page-header { align-items: flex-start; gap: 0.75rem; padding: 1rem; }
+            .page-header { align-items: flex-start; gap: 0.75rem; padding: 0.2rem 0 1rem; }
             .page-heading { display: flex; align-items: flex-start; gap: 0.7rem; }
             .page-header > .button { min-width: 42px; padding: 0.6rem; font-size: 0; }
             .page-header > .button i { font-size: 0.9rem; }
             .page-header p { font-size: 0.79rem; line-height: 1.6; }
-            .filters { align-items: stretch; padding: 0.8rem; }
+            .filters { align-items: stretch; padding: 0.85rem; }
             .date-field { min-width: 0; flex: 1 1 calc(50% - 0.5rem); }
             .filters > .button { flex: 1 1 100%; }
             .quick-filters { width: 100%; margin: 0; }
@@ -610,6 +809,11 @@
             .payment-list { grid-template-columns: 1fr; }
             .chart { height: 205px; }
             .chart-track { height: 125px; }
+            .danger-zone { align-items: stretch; flex-direction: column; }
+            .danger-zone .button { width: 100%; }
+            .panel-heading { gap: 0.55rem; }
+            .panel-heading h2 { font-size: 0.94rem; }
+            .panel-heading p { max-width: 250px; font-size: 0.71rem; }
         }
 
         @media (max-width: 360px) {
@@ -636,7 +840,10 @@
     <aside class="sidebar" id="sidebar">
         <a class="brand" href="index.html">
             <span class="brand-mark"><i class="fas fa-utensils"></i></span>
-            <span>Sitenexs Cafe & Resto</span>
+            <span class="brand-copy">
+                <strong>Sitenexs Cafe &amp; Resto</strong>
+                <small>Admin dashboard</small>
+            </span>
         </a>
         <p class="nav-label">Navigasi</p>
         <ul class="nav-links">
@@ -653,7 +860,7 @@
             <div class="page-heading">
                 <button class="menu-button" type="button" onclick="toggleNavigation()" aria-label="Buka navigasi"><i class="fas fa-bars"></i></button>
                 <div>
-                    <span class="eyebrow"><i class="fas fa-chart-pie"></i> Dashboard / Keuangan</span>
+                    <span class="eyebrow"><i class="fas fa-chart-pie"></i> Panel Admin / Keuangan</span>
                     <h1>Laporan Pemasukan</h1>
                     <p>Ringkasan transaksi selesai, pemasukan, dan metode pembayaran dalam periode pilihan.</p>
                 </div>
@@ -719,6 +926,16 @@
                 </div>
                 <ul class="payment-list" id="payment-breakdown"></ul>
             </article>
+            <article class="panel product-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Produk terlaris</h2>
+                        <p>Diurutkan berdasarkan jumlah unit terjual pada periode ini</p>
+                    </div>
+                    <span class="summary-icon"><i class="fas fa-award"></i></span>
+                </div>
+                <ol class="product-ranking" id="best-selling-products"></ol>
+            </article>
         </section>
 
         <section class="panel table-panel">
@@ -747,7 +964,31 @@
                 </table>
             </div>
         </section>
+
+        <section class="danger-zone" aria-labelledby="reset-title">
+            <div>
+                <h2 id="reset-title"><i class="fas fa-rotate-left"></i> Reset tampilan laporan</h2>
+                <p>Mengosongkan ringkasan, grafik, dan tabel yang sedang tampil di halaman ini saja. Data pesanan, produk, dan pengaturan di database tetap aman. Klik “Perbarui Data” untuk menampilkannya kembali.</p>
+            </div>
+            <button class="button secondary" id="open-reset-button" type="button" onclick="openResetDialog()"><i class="fas fa-rotate-left"></i> Reset Tampilan</button>
+        </section>
     </main>
+
+    <dialog class="reset-dialog" id="reset-dialog" aria-labelledby="reset-dialog-title">
+        <form class="reset-dialog-content" id="reset-form">
+            <span class="reset-dialog-icon"><i class="fas fa-rotate-left"></i></span>
+            <h2 id="reset-dialog-title">Reset tampilan laporan?</h2>
+            <p>Ringkasan, grafik, daftar produk terlaris, dan transaksi yang sedang tampil akan dikosongkan dari halaman ini.</p>
+            <div class="reset-scope"><strong>Data database tetap aman.</strong><br>Tidak ada pesanan, produk, panggilan, atau pengaturan yang dihapus. Klik “Perbarui Data” kapan saja untuk memuat laporan lagi.</div>
+            <label for="reset-confirmation">Ketik <strong>reset</strong> untuk mengonfirmasi</label>
+            <input id="reset-confirmation" name="confirmation" type="text" autocomplete="off" spellcheck="false" aria-describedby="reset-confirmation-help">
+            <p id="reset-confirmation-help">Reset hanya berlaku selama halaman ini terbuka.</p>
+            <div class="reset-dialog-actions">
+                <button class="button secondary" id="cancel-reset-button" type="button" onclick="closeResetDialog()">Batal</button>
+                <button class="button" id="confirm-reset-button" type="submit" disabled><i class="fas fa-rotate-left"></i> Kosongkan Tampilan</button>
+            </div>
+        </form>
+    </dialog>
 
     <script>
         const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co';
@@ -790,6 +1031,27 @@
             const notice = document.getElementById('report-notice');
             notice.textContent = '';
             notice.className = 'notice';
+        }
+
+        function openResetDialog() {
+            const dialog = document.getElementById('reset-dialog');
+            document.getElementById('reset-confirmation').value = '';
+            document.getElementById('confirm-reset-button').disabled = true;
+            dialog.showModal();
+            document.getElementById('reset-confirmation').focus();
+        }
+
+        function closeResetDialog() {
+            document.getElementById('reset-dialog').close();
+        }
+
+        function resetReportView() {
+            hideNotice();
+            allOrders = [];
+            reportOrders = [];
+            renderReport();
+            closeResetDialog();
+            showNotice('Tampilan laporan sudah dikosongkan. Data di database tidak diubah. Klik “Perbarui Data” untuk memuat kembali.');
         }
 
         function escapeHtml(value) {
@@ -865,7 +1127,7 @@
                 while (true) {
                     const { data, error } = await db
                         .from('orders')
-                        .select('id, table, name, total, paymentMethod, status, time, created_at')
+                        .select('id, table, name, total, paymentMethod, status, time, created_at, items')
                         .order('created_at', { ascending: false, nullsFirst: false })
                         .range(offset, offset + pageSize - 1);
                     if (error) throw error;
@@ -922,6 +1184,7 @@
 
             renderChart(reportOrders);
             renderPaymentBreakdown(reportOrders);
+            renderBestSellingProducts(reportOrders);
             renderTransactions(reportOrders);
         }
 
@@ -978,6 +1241,62 @@
                     <span class="payment-total">${escapeHtml(formatCurrency(value))}</span>
                     <span class="payment-progress"><span style="width:${Math.max(2, value / max * 100)}%"></span></span>
                 </li>`).join('');
+        }
+
+        function renderBestSellingProducts(orders) {
+            const ranking = document.getElementById('best-selling-products');
+            const quantities = new Map();
+            let invalidOrders = 0;
+
+            orders.forEach(order => {
+                let items = order.items;
+                if (typeof items === 'string') {
+                    try {
+                        items = JSON.parse(items);
+                    } catch {
+                        invalidOrders += 1;
+                        return;
+                    }
+                }
+
+                if (!Array.isArray(items)) {
+                    invalidOrders += 1;
+                    return;
+                }
+
+                items.forEach(item => {
+                    const name = typeof item?.name === 'string' ? item.name.trim() : '';
+                    const quantity = Number(item?.qty);
+                    if (!name || !Number.isFinite(quantity) || quantity <= 0) return;
+
+                    const key = name.toLocaleLowerCase('id-ID');
+                    const current = quantities.get(key) || { name, quantity: 0 };
+                    current.quantity += quantity;
+                    quantities.set(key, current);
+                });
+            });
+
+            const products = [...quantities.values()]
+                .sort((a, b) => b.quantity - a.quantity || a.name.localeCompare(b.name, 'id-ID'))
+                .slice(0, 10);
+
+            if (!products.length) {
+                ranking.innerHTML = '<li class="panel-empty">Belum ada data item pada pesanan selesai di periode ini.</li>';
+            } else {
+                const maxQuantity = products[0].quantity;
+                ranking.innerHTML = products.map(product => {
+                    const percentage = Math.max(3, product.quantity / maxQuantity * 100);
+                    return `<li class="product-ranking-row" title="${escapeHtml(product.name)} — ${product.quantity.toLocaleString('id-ID')} unit">
+                        <span class="product-ranking-name">${escapeHtml(product.name)}</span>
+                        <span class="product-ranking-qty">${product.quantity.toLocaleString('id-ID')} unit</span>
+                        <span class="product-ranking-track"><span style="width:${percentage}%"></span></span>
+                    </li>`;
+                }).join('');
+            }
+
+            if (invalidOrders) {
+                showNotice(`${invalidOrders} pesanan memiliki format item yang tidak dapat dibaca; grafik produk terlaris mungkin belum mencakup semuanya.`);
+            }
         }
 
         function renderTransactions(orders) {
@@ -1037,6 +1356,16 @@
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('nav-overlay').classList.toggle('show');
         }
+
+        document.getElementById('reset-confirmation').addEventListener('input', event => {
+            document.getElementById('confirm-reset-button').disabled = event.target.value !== 'reset';
+        });
+
+        document.getElementById('reset-form').addEventListener('submit', event => {
+            event.preventDefault();
+            if (document.getElementById('reset-confirmation').value !== 'reset') return;
+            resetReportView();
+        });
 
         const today = new Date();
         setDateInputs(dateInputValue(new Date(today.getFullYear(), today.getMonth(), 1)), dateInputValue(today));
