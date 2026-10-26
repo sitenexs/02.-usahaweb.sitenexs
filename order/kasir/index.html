@@ -14,23 +14,26 @@
 
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #eff6ff;
-            --bg-body: #f8fafc;
+            --primary: #ea580c;
+            --primary-dark: #c2410c;
+            --primary-light: #fff7ed;
+            --sidebar-bg: #1c1917;
+            --sidebar-text: #a8a29e;
+            --bg-body: #fafaf9;
             --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-subtle: #e2e8f0;
+            --text-main: #292524;
+            --text-muted: #78716c;
+            --border-subtle: #e7e5e4;
             --danger: #ef4444;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --radius-sm: 0.3rem;
-            --radius-md: 0.5rem;
+            --danger-dark: #dc2626;
+            --success: #16a34a;
+            --warning: #d97706;
+            --radius-sm: 0.5rem;
+            --radius-md: 0.85rem;
             --radius-full: 9999px;
-            --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
-            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08);
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 1px 3px 0 rgba(28, 25, 23, 0.05);
+            --shadow-md: 0 10px 20px -5px rgba(28, 25, 23, 0.09);
+            --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -43,17 +46,18 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            font-size: 0.825rem;
+            font-size: 0.85rem;
             display: flex;
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Sidebar */
+        /* Sidebar Modern Dark Warm */
         aside {
-            width: 240px;
-            background: #ffffff;
-            border-right: 1px solid var(--border-subtle);
+            width: 250px;
+            background: var(--sidebar-bg);
+            color: #fff;
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -65,39 +69,45 @@
         }
 
         .sidebar-brand {
-            padding: 1rem;
-            font-size: 0.95rem;
+            padding: 1.35rem 1.25rem;
+            font-size: 1.05rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.7rem;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            letter-spacing: -0.01em;
+        }
+
+        .sidebar-brand i {
             color: var(--primary);
-            border-bottom: 1px solid var(--border-subtle);
+            font-size: 1.2rem;
         }
 
         .sidebar-menu {
             list-style: none;
-            padding: 0.75rem 0.5rem;
+            padding: 1rem 0.75rem;
             flex: 1;
         }
 
         .sidebar-menu li {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.35rem;
         }
 
         .sidebar-menu a, .sidebar-menu button {
             width: 100%;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
-            padding: 0.6rem 0.75rem;
-            color: var(--text-muted);
+            gap: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            color: var(--sidebar-text);
             background: none;
             border: none;
             text-align: left;
             text-decoration: none;
             font-family: inherit;
-            font-size: 0.825rem;
+            font-size: 0.82rem;
             font-weight: 600;
             border-radius: var(--radius-sm);
             cursor: pointer;
@@ -105,8 +115,8 @@
         }
 
         .sidebar-menu a:hover, .sidebar-menu a.active, .sidebar-menu button:hover {
-            background: var(--primary-light);
-            color: var(--primary);
+            background: rgba(234, 88, 12, 0.16);
+            color: #fb923c;
         }
 
         .sidebar-overlay {
@@ -116,7 +126,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.4);
+            background: rgba(28, 25, 23, 0.5);
             z-index: 900;
             backdrop-filter: blur(2px);
         }
@@ -126,10 +136,10 @@
 
         /* Main Content */
         main {
-            margin-left: 240px;
+            margin-left: 250px;
             flex: 1;
-            padding: 1.5rem;
-            max-width: calc(100vw - 240px);
+            padding: 1.5rem 2rem;
+            max-width: calc(100vw - 250px);
             transition: var(--transition);
         }
 
@@ -137,8 +147,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            background: #ffffff;
+            margin-bottom: 1.25rem;
+            background: var(--bg-card);
             padding: 1rem 1.25rem;
             border-radius: var(--radius-md);
             border: 1px solid var(--border-subtle);
@@ -149,32 +159,69 @@
         .header-top {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.85rem;
         }
 
         header h1 {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.15rem;
         }
 
         header p {
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 0.76rem;
         }
 
         .mobile-toggle-btn {
             display: none;
-            background: none;
-            border: none;
-            font-size: 1.25rem;
+            background: #f5f5f4;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
             color: var(--text-main);
             cursor: pointer;
-            padding: 0.25rem;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
+
+        /* Statistik Cepat Kasir */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stat-icon {
+            width: 38px; height: 38px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; background: var(--primary-light);
+            color: var(--primary); flex-shrink: 0;
+        }
+
+        .stat-info h4 { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; margin-bottom: 0.1rem; }
+        .stat-info span { font-size: 1.1rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; }
 
         #alarm-banner {
             display: none;
-            background: #fee2e2;
+            background: #fef2f2;
             border: 2px solid #ef4444;
             padding: 1rem 1.25rem;
             border-radius: var(--radius-md);
@@ -186,16 +233,16 @@
         }
 
         @keyframes pulseAlert {
-            from { background-color: #fee2e2; transform: scale(1); }
-            to { background-color: #fecaca; transform: scale(1.005); }
+            from { background-color: #fef2f2; transform: scale(1); }
+            to { background-color: #fee2e2; transform: scale(1.005); }
         }
 
         .call-banner {
-            background: #fef3c7;
+            background: #fffbeb;
             border: 1px solid #fde68a;
-            padding: 0.75rem 1rem;
+            padding: 0.85rem 1.1rem;
             border-radius: var(--radius-md);
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -221,7 +268,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.1rem;
             gap: 1rem;
             flex-wrap: wrap;
         }
@@ -234,23 +281,25 @@
         /* Filter Tab Nav */
         .filter-tabs {
             display: flex;
-            gap: 0.35rem;
-            background: var(--bg-body);
-            padding: 0.25rem;
+            gap: 0.4rem;
+            background: #f5f5f4;
+            padding: 0.3rem;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-subtle);
+            overflow-x: auto;
         }
 
         .filter-tab {
             background: none;
             border: none;
-            padding: 0.35rem 0.75rem;
-            font-size: 0.75rem;
+            padding: 0.42rem 0.85rem;
+            font-size: 0.74rem;
             font-weight: 600;
             color: var(--text-muted);
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
+            white-space: nowrap;
         }
 
         .filter-tab.active {
@@ -261,15 +310,15 @@
 
         .orders-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 1.1rem;
         }
 
         .order-card {
             background: #ffffff;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
-            padding: 1rem;
+            padding: 1.1rem;
             box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
@@ -279,46 +328,49 @@
 
         .order-card:hover {
             box-shadow: var(--shadow-md);
-            border-color: #cbd5e1;
+            border-color: #fdba74;
         }
 
         .order-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
             border-bottom: 1px solid var(--border-subtle);
-            padding-bottom: 0.5rem;
+            padding-bottom: 0.6rem;
             gap: 0.5rem;
         }
 
         .order-items-list {
-            margin-bottom: 0.75rem;
-            max-height: 120px;
+            margin-bottom: 0.85rem;
+            max-height: 150px;
             overflow-y: auto;
+            padding-right: 2px;
         }
 
         .order-item-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.775rem;
-            margin-bottom: 0.3rem;
+            font-size: 0.78rem;
+            margin-bottom: 0.45rem;
             color: var(--text-main);
             gap: 0.5rem;
+            border-bottom: 1px dashed #f5f5f4;
+            padding-bottom: 0.3rem;
         }
 
         .proof-box {
-            background: var(--bg-body);
+            background: #fafaf9;
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-sm);
-            padding: 0.5rem;
-            margin-bottom: 0.75rem;
+            padding: 0.6rem;
+            margin-bottom: 0.85rem;
             text-align: center;
         }
 
         .proof-thumb {
             width: 100%;
-            height: 90px;
+            height: 100px;
             object-fit: cover;
             border-radius: var(--radius-sm);
             cursor: pointer;
@@ -332,15 +384,15 @@
 
         .badge {
             display: inline-block;
-            padding: 0.2rem 0.5rem;
-            font-size: 0.7rem;
-            font-weight: 600;
+            padding: 0.22rem 0.55rem;
+            font-size: 0.68rem;
+            font-weight: 700;
             border-radius: var(--radius-full);
             white-space: nowrap;
         }
 
-        .badge-menunggu { background: #fef3c7; color: #d97706; }
-        .badge-diproses { background: #dbeafe; color: #1d4ed8; }
+        .badge-menunggu { background: #fef3c7; color: #b45309; }
+        .badge-diproses { background: #fff7ed; color: #c2410c; }
         .badge-selesai { background: #dcfce7; color: #15803d; }
 
         .btn {
@@ -348,8 +400,8 @@
             align-items: center;
             justify-content: center;
             gap: 0.4rem;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.75rem;
+            padding: 0.52rem 0.95rem;
+            font-size: 0.78rem;
             font-weight: 600;
             border-radius: var(--radius-sm);
             cursor: pointer;
@@ -357,25 +409,27 @@
             transition: var(--transition);
             white-space: nowrap;
         }
+        .btn:active { transform: scale(0.97); }
 
-        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 5px rgba(234, 88, 12, 0.22); }
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success); color: #fff; }
-        .btn-success:hover { background: #16a34a; }
-        .btn-secondary { background: #e2e8f0; color: var(--text-main); }
-        .btn-secondary:hover { background: #cbd5e1; }
-        .btn-danger { background: #fee2e2; color: var(--danger); }
+        .btn-success:hover { background: #15803d; }
+        .btn-secondary { background: #f5f5f4; color: var(--text-main); border: 1px solid var(--border-subtle); }
+        .btn-secondary:hover { background: #e7e5e4; }
+        .btn-danger { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
         .btn-danger:hover { background: var(--danger); color: #fff; }
 
         .image-modal, .settings-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(28, 25, 23, 0.6);
             z-index: 3000;
             align-items: center;
             justify-content: center;
             padding: 1rem;
+            backdrop-filter: blur(4px);
         }
 
         .image-modal img {
@@ -389,7 +443,7 @@
         .settings-content {
             background: #fff;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             padding: 1.5rem;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-md);
@@ -398,7 +452,7 @@
         #audio-unlock-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(28, 25, 23, 0.85);
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -407,15 +461,25 @@
             color: white;
             text-align: center;
             padding: 1.5rem;
+            backdrop-filter: blur(5px);
         }
 
-        @media(max-width: 768px) {
+        @media(max-width: 900px) {
             aside { transform: translateX(-100%); }
             aside.show { transform: translateX(0); }
-            main { margin-left: 0; max-width: 100vw; padding: 1rem 0.75rem; }
-            header { flex-direction: column; align-items: flex-start; padding: 1rem; }
-            .mobile-toggle-btn { display: inline-block; }
-            header .btn-secondary { width: 100%; }
+            main { margin-left: 0; max-width: 100vw; padding: 1.1rem; }
+            .mobile-toggle-btn { display: inline-flex; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media(max-width: 640px) {
+            main { padding: 0.85rem; }
+            header { flex-direction: column; align-items: stretch; padding: 0.9rem; gap: 0.75rem; }
+            header h1 { font-size: 1.02rem; }
+            header p { font-size: 0.72rem; }
+            header div[style*="display: flex; gap: 0.5rem;"] { width: 100%; }
+            header div[style*="display: flex; gap: 0.5rem;"] .btn { flex: 1; }
+            .stats-grid { grid-template-columns: 1fr; gap: 0.75rem; }
             .call-banner { flex-direction: column; align-items: flex-start; }
             .call-banner .btn { width: 100%; }
             .orders-grid { grid-template-columns: 1fr; }
@@ -425,9 +489,9 @@
 <body>
 
     <div id="audio-unlock-modal">
-        <div style="background: white; color: var(--text-main); padding: 2rem; border-radius: 1rem; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <div style="background: white; color: var(--text-main); padding: 2rem; border-radius: var(--radius-md); max-width: 400px; box-shadow: var(--shadow-md);">
             <i class="fas fa-volume-up" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
-            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Aktifkan Suara Notifikasi</h2>
+            <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Aktifkan Suara Notifikasi</h2>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.5rem;">Klik tombol di bawah ini untuk mengizinkan alarm suara dan mendownload otomatis berkas pesanan baru.</p>
             <button class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;" onclick="unlockAudio()">Aktifkan & Masuk Kasir</button>
         </div>
@@ -436,21 +500,21 @@
     <!-- Modal Pengaturan Suara Dering -->
     <div class="settings-modal" id="settings-modal">
         <div class="settings-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3 style="font-size: 1rem; font-weight: 700;"><i class="fas fa-sliders"></i> Pengaturan Suara Dering</h3>
-                <button onclick="closeSettingsModal()" style="background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem;">
+                <h3 style="font-size: 1.05rem; font-weight: 700;"><i class="fas fa-sliders" style="color: var(--primary);"></i> Pengaturan Suara Dering</h3>
+                <button onclick="closeSettingsModal()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted);"><i class="fas fa-times"></i></button>
             </div>
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.75rem; color: var(--text-muted);">Pilih Nada Dering Notifikasi:</label>
-                <select id="sound-style-select" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8rem;" onchange="saveSoundPreference(this.value)">
+            <div style="margin-bottom: 1.1rem;">
+                <label style="display: block; font-weight: 700; margin-bottom: 0.35rem; font-size: 0.76rem; color: var(--text-main);">Pilih Nada Dering Notifikasi:</label>
+                <select id="sound-style-select" style="width: 100%; padding: 0.58rem 0.8rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.82rem; outline: none; background: #fff;" onchange="saveSoundPreference(this.value)">
                     <option value="beep">Beep Digital Klasik</option>
                     <option value="chime">Bel Restoran / Chime</option>
                     <option value="siren">Sirene Peringatan</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-primary" style="flex: 1;" onclick="testAlarm()"><i class="fas fa-play"></i> Tes Suara Dering</button>
-                <button class="btn btn-secondary" style="flex: 1;" onclick="closeSettingsModal()">Tutup</button>
+            <div style="display: flex; gap: 0.6rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeSettingsModal()">Tutup</button>
+                <button class="btn btn-primary" onclick="testAlarm()"><i class="fas fa-play"></i> Tes Suara Dering</button>
             </div>
         </div>
     </div>
@@ -466,12 +530,13 @@
 
     <aside id="sidebar">
         <div class="sidebar-brand">
-            <i class="fas fa-cash-register"></i> <span>Sitenexs Kasir</span>
+            <i class="fas fa-mug-hot"></i> <span>Sitenexs Kasir</span>
         </div>
         <ul class="sidebar-menu">
             <li><a href="#" class="active"><i class="fas fa-cash-register"></i> <span>Kasir / Pelayan</span></a></li>
             <li><button onclick="openSettingsModal()"><i class="fas fa-volume-high"></i> <span>Ubah Suara Dering</span></button></li>
-            <li><a href="#" target="_blank"><i class="fas fa-external-link-alt"></i> <span>Buka Menu Pelanggan</span></a></li>
+            <li><a href="admin.html"><i class="fas fa-utensils"></i> <span>Kelola Produk</span></a></li>
+            <li><a href="pesan.html" target="_blank"><i class="fas fa-external-link-alt"></i> <span>Menu Pelanggan</span></a></li>
         </ul>
     </aside>
 
@@ -486,11 +551,43 @@
                     <p>Sistem otomatis mendownload struk pesanan & bukti transfer, serta membersihkan riwayat lama setiap 2 jam.</p>
                 </div>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                 <button class="btn btn-primary" onclick="testAlarm()"><i class="fas fa-bell"></i> Tes Suara</button>
-                <button class="btn btn-secondary" onclick="loadOrders(); loadWaiterCalls();"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+                <button class="btn btn-secondary" onclick="loadOrders(); loadWaiterCalls();"><i class="fas fa-sync-alt"></i> Refresh</button>
             </div>
         </header>
+
+        <!-- Stats Overview Kasir -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+                <div class="stat-info">
+                    <h4>Total Pesanan</h4>
+                    <span id="stat-total-orders">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #b45309;"><i class="fas fa-clock"></i></div>
+                <div class="stat-info">
+                    <h4>Pesan Masuk</h4>
+                    <span id="stat-pending-orders">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fff7ed; color: #c2410c;"><i class="fas fa-fire"></i></div>
+                <div class="stat-info">
+                    <h4>Diproses</h4>
+                    <span id="stat-process-orders">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #dcfce7; color: #15803d;"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <h4>Selesai</h4>
+                    <span id="stat-done-orders">0</span>
+                </div>
+            </div>
+        </div>
 
         <div id="alarm-banner">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -500,7 +597,7 @@
                     <p style="font-size: 0.75rem; color: #b91c1c;">Struk & Bukti Transfer telah otomatis terdownload ke perangkat Anda.</p>
                 </div>
             </div>
-            <button class="btn btn-danger" style="background: #ef4444; color: #fff; padding: 0.6rem 1rem; font-size: 0.85rem;" onclick="stopAlarmManual()">
+            <button class="btn btn-danger" style="background: #ef4444; color: #fff; padding: 0.52rem 0.95rem; font-size: 0.78rem;" onclick="stopAlarmManual()">
                 <i class="fas fa-volume-xmark"></i> Matikan Alarm
             </button>
         </div>
@@ -615,8 +712,7 @@
         }
 
         function playChimeSound() {
-            // Bel Restoran / Chime nada tinggi lembut
-            const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            const frequencies = [523.25, 659.25, 783.99, 1046.50];
             frequencies.forEach((freq, idx) => {
                 setTimeout(() => {
                     try {
@@ -693,7 +789,6 @@
             playNotificationSound();
         }
 
-        // Fungsi Auto-Download Struk / Teks Pesanan dan Bukti Pembayaran ke Komputer Kasir
         function autoDownloadOrderAssets(order) {
             try {
                 const itemsArray = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
@@ -822,7 +917,7 @@
                                 <p style="font-size: 0.7rem; color: #b45309;">Waktu Panggilan: ${c.time || '-'}</p>
                             </div>
                         </div>
-                        <button class="btn btn-secondary" style="background: #fff; border: 1px solid #fde68a;" onclick="resolveCall('${c.id}')">
+                        <button class="btn btn-secondary" onclick="resolveCall('${c.id}')">
                             <i class="fas fa-check"></i> Selesaikan
                         </button>
                     </div>
@@ -848,7 +943,15 @@
             }
             lastOrderCount = ordersList.length;
 
+            updateStats();
             renderOrders();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total-orders').innerText = ordersList.length;
+            document.getElementById('stat-pending-orders').innerText = ordersList.filter(o => o.status === 'Menunggu').length;
+            document.getElementById('stat-process-orders').innerText = ordersList.filter(o => o.status === 'Diproses').length;
+            document.getElementById('stat-done-orders').innerText = ordersList.filter(o => o.status === 'Selesai').length;
         }
 
         function renderOrders() {
@@ -862,7 +965,7 @@
             container.innerHTML = '';
 
             if (filteredOrders.length === 0) {
-                container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">Tidak ada pesanan untuk kategori ini.</div>`;
+                container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">Tidak ada pesanan untuk kategori ini.</div>`;
                 return;
             }
 
@@ -877,7 +980,7 @@
                 itemsArray.forEach(item => {
                     itemsHtml += `
                         <div class="order-item-row">
-                            <span>${item.qty}x ${item.name} ${item.note ? `<br><small style="color:var(--primary)">Catatan: ${item.note}</small>` : ''}</span>
+                            <span><b>${item.qty}x</b> ${item.name} ${item.note ? `<br><small style="color:var(--primary)">Catatan: ${item.note}</small>` : ''}</span>
                             <span>Rp ${(item.price * item.qty).toLocaleString('id-ID')}</span>
                         </div>
                     `;
@@ -887,9 +990,9 @@
                 if (order.paymentProof) {
                     proofHtml = `
                         <div class="proof-box">
-                            <p style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-bottom: 3px;"><i class="fas fa-receipt"></i> Bukti Pembayaran (${order.paymentMethod}):</p>
+                            <p style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 3px;"><i class="fas fa-receipt"></i> Bukti Pembayaran (${order.paymentMethod}):</p>
                             <img src="${order.paymentProof}" class="proof-thumb" onclick="openProofModal('${order.paymentProof}')" alt="Bukti Transfer">
-                            <small style="font-size: 0.55rem; color: var(--primary); display: block; margin-top: 2px;">Klik gambar untuk memperbesar</small>
+                            <small style="font-size: 0.6rem; color: var(--primary); display: block; margin-top: 3px;">Klik gambar untuk memperbesar</small>
                         </div>
                     `;
                 }
@@ -900,7 +1003,7 @@
                             <div class="order-header">
                                 <div>
                                     <h4 style="font-size: 0.9rem; font-weight: 700;">Meja ${order.table} — ${order.name}</h4>
-                                    <span style="font-size: 0.7rem; color: var(--text-muted);">${order.id} • ${order.time || '-'}</span>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted);">${order.id} • ${order.time || '-'}</span>
                                 </div>
                                 <span class="badge ${badgeClass}">${order.status}</span>
                             </div>
@@ -910,15 +1013,15 @@
                             ${proofHtml}
                         </div>
                         <div>
-                            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; margin-bottom: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; border-top: 1px solid var(--border-subtle); padding-top: 0.55rem; margin-bottom: 0.85rem;">
                                 <span>Total (${order.paymentMethod || 'Tunai'}):</span>
                                 <span style="color: var(--primary);">Rp ${(order.total || 0).toLocaleString('id-ID')}</span>
                             </div>
-                            <div style="display: flex; gap: 0.4rem;">
+                            <div style="display: flex; gap: 0.45rem;">
                                 ${order.status === 'Menunggu' ? `<button class="btn btn-primary" style="flex:1;" onclick="updateOrderStatus('${order.id}', 'Diproses')"><i class="fas fa-fire"></i> Proses</button>` : ''}
                                 ${order.status === 'Diproses' ? `<button class="btn btn-success" style="flex:1;" onclick="updateOrderStatus('${order.id}', 'Selesai')"><i class="fas fa-check"></i> Selesai</button>` : ''}
                                 ${order.status === 'Selesai' ? `<button class="btn btn-secondary" style="flex:1;" disabled>Pesanan Selesai</button>` : ''}
-                                <button class="btn btn-danger" onclick="deleteOrder('${order.id}')"><i class="fas fa-trash"></i></button>
+                                <button class="btn btn-danger" onclick="deleteOrder('${order.id}')" title="Hapus"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     </div>
