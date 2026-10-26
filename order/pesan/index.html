@@ -701,6 +701,30 @@
         </div>
     </div>
 
+    <!-- Modal Welcome / Isi Identitas Awal -->
+    <div class="modal" id="welcome-modal" style="z-index: 3000;">
+        <div class="modal-content" style="max-width: 380px; margin: auto;">
+            <div style="text-align: center; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 0.4rem;">Selamat Datang! <i class="fas fa-hand-sparkles"></i></h3>
+                <p style="font-size: 0.775rem; color: var(--text-muted); line-height: 1.4;">Sebelum mulai memesan, silakan isi nomor meja dan nama Anda terlebih dahulu.</p>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.4rem;"><i class="fas fa-chair text-primary"></i> Nomor Meja <span style="color:var(--danger)">*</span></label>
+                <input type="number" id="welcome-table-number" placeholder="Contoh: 5" style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.85rem; outline: none; background: #f8fafc;" min="1" required>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-main); display: block; margin-bottom: 0.4rem;"><i class="fas fa-user text-primary"></i> Nama Anda <span style="color:var(--danger)">*</span></label>
+                <input type="text" id="welcome-customer-name" placeholder="Nama lengkap atau panggilan..." style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.85rem; outline: none; background: #f8fafc;" required>
+            </div>
+
+            <button class="btn btn-primary" onclick="submitWelcomeData()" style="padding: 0.75rem; font-size: 0.85rem;">
+                Mulai Pesan Menu <i class="fas fa-arrow-right" style="margin-left: 0.3rem;"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Modal Panduan / Instruksi Penggunaan -->
     <div class="modal" id="guide-modal">
         <div class="modal-content" style="max-width: 380px; margin: auto;">
@@ -946,18 +970,23 @@
         window.addEventListener('DOMContentLoaded', () => {
             const savedTable = localStorage.getItem('sitenexs_table');
             const savedName = localStorage.getItem('sitenexs_name');
-            if (savedTable) {
+            
+            // CEK APAKAH DATA SUDAH ADA
+            if (!savedTable || !savedName) {
+                // Jika kosong, tampilkan form awal
+                openModal('welcome-modal');
+            } else {
+                // Jika sudah ada, isi otomatis form utama
                 document.getElementById('table-number').value = savedTable;
                 document.getElementById('modal-table-number').value = savedTable;
-            }
-            if (savedName) {
                 document.getElementById('customer-name').value = savedName;
                 document.getElementById('modal-customer-name').value = savedName;
-            }
-
-            if (!localStorage.getItem('sitenexs_guide_shown')) {
-                openGuideModal();
-                localStorage.setItem('sitenexs_guide_shown', 'true');
+                
+                // Tampilkan panduan jika belum pernah dibuka
+                if (!localStorage.getItem('sitenexs_guide_shown')) {
+                    openGuideModal();
+                    localStorage.setItem('sitenexs_guide_shown', 'true');
+                }
             }
 
             if (activeOrderId) {
@@ -975,6 +1004,50 @@
               })
               .subscribe();
         });
+
+        // FUNGSI UNTUK MENYIMPAN DATA DARI MODAL WELCOME
+        function submitWelcomeData() {
+            const tableInput = document.getElementById('welcome-table-number');
+            const nameInput = document.getElementById('welcome-customer-name');
+            
+            const tableVal = tableInput.value.trim();
+            const nameVal = nameInput.value.trim();
+
+            if (!tableVal) {
+                showToast('Mohon isi nomor meja Anda!', 'warning');
+                tableInput.classList.add('shake-element');
+                setTimeout(() => tableInput.classList.remove('shake-element'), 600);
+                return;
+            }
+
+            if (!nameVal) {
+                showToast('Mohon isi nama Anda!', 'warning');
+                nameInput.classList.add('shake-element');
+                setTimeout(() => nameInput.classList.remove('shake-element'), 600);
+                return;
+            }
+
+            // Simpan ke localStorage
+            localStorage.setItem('sitenexs_table', tableVal);
+            localStorage.setItem('sitenexs_name', nameVal);
+            
+            // Sinkronisasi ke input utama dan keranjang
+            document.getElementById('table-number').value = tableVal;
+            document.getElementById('modal-table-number').value = tableVal;
+            document.getElementById('customer-name').value = nameVal;
+            document.getElementById('modal-customer-name').value = nameVal;
+
+            closeModal('welcome-modal');
+            showToast(`Selamat datang, ${nameVal}!`, 'success');
+
+            // Setelah mengisi data, cek apakah perlu menampilkan panduan
+            if (!localStorage.getItem('sitenexs_guide_shown')) {
+                setTimeout(() => {
+                    openGuideModal();
+                    localStorage.setItem('sitenexs_guide_shown', 'true');
+                }, 400); // Jeda animasi agar halus
+            }
+        }
 
         function openGuideModal() {
             openModal('guide-modal');
