@@ -536,6 +536,7 @@
             <li><a href="#" class="active"><i class="fas fa-cash-register"></i> <span>Kasir / Pelayan</span></a></li>
             <li><button onclick="openSettingsModal()"><i class="fas fa-volume-high"></i> <span>Ubah Suara Dering</span></button></li>
             <li><a href="admin.html"><i class="fas fa-utensils"></i> <span>Kelola Produk</span></a></li>
+            <li><a href="../laporan-penjualan/"><i class="fas fa-chart-line"></i> <span>Laporan Penjualan</span></a></li>
             <li><a href="pesan.html" target="_blank"><i class="fas fa-external-link-alt"></i> <span>Menu Pelanggan</span></a></li>
         </ul>
     </aside>
@@ -548,7 +549,7 @@
                 </button>
                 <div>
                     <h1>Dashboard Kasir & Pelayan Meja</h1>
-                    <p>Sistem otomatis mendownload struk pesanan & bukti transfer, serta membersihkan riwayat lama setiap 2 jam.</p>
+                    <p>Sistem otomatis mendownload struk pesanan & bukti transfer. Riwayat pesanan tersimpan untuk laporan penjualan.</p>
                 </div>
             </div>
             <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
@@ -651,7 +652,6 @@
             loadOrders();
             loadWaiterCalls();
             setupRealtimeSubscriptions();
-            initCleanupTask();
         }
 
         function saveSoundPreference(val) {
@@ -796,7 +796,7 @@
                 textContent += `ID Pesanan : ${order.id}\n`;
                 textContent += `Meja       : ${order.table}\n`;
                 textContent += `Nama Pemesan: ${order.name}\n`;
-                textContent += `Waktu      : ${order.time || '-'}\n`;
+                textContent += `Waktu      : ${formatOrderTime(order.time)}\n`;
                 textContent += `Pembayaran : ${order.paymentMethod || 'Tunai'}\n`;
                 textContent += `------------------------------------\n`;
                 itemsArray.forEach(item => {
@@ -830,15 +830,19 @@
             }
         }
 
-        function initCleanupTask() {
-            setInterval(async () => {
-                try {
-                    await _supabase.from('orders').delete().eq('status', 'Selesai');
-                    loadOrders();
-                } catch (e) {
-                    console.error("Gagal membersihkan data lama:", e);
-                }
-            }, 2 * 60 * 60 * 1000);
+        function formatOrderTime(time) {
+            if (!time) return '-';
+            const timestamp = typeof time === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(time)
+                ? new Date(time)
+                : null;
+            if (!timestamp || Number.isNaN(timestamp.getTime())) return time;
+            return timestamp.toLocaleString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         function setupRealtimeSubscriptions() {
@@ -1003,7 +1007,7 @@
                             <div class="order-header">
                                 <div>
                                     <h4 style="font-size: 0.9rem; font-weight: 700;">Meja ${order.table} — ${order.name}</h4>
-                                    <span style="font-size: 0.72rem; color: var(--text-muted);">${order.id} • ${order.time || '-'}</span>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted);">${order.id} • ${formatOrderTime(order.time)}</span>
                                 </div>
                                 <span class="badge ${badgeClass}">${order.status}</span>
                             </div>
