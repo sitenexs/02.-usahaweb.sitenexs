@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Penjualan — Sitenexs Cafe & Resto</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #ea580c;
+            --primary-light: #fff7ed;
+            --bg-body: #fafaf9;
+            --bg-card: #ffffff;
+            --text-main: #292524;
+            --text-muted: #78716c;
+            --border-subtle: #e7e5e4;
+            --success: #16a34a;
+            --danger: #ef4444;
+            --accent-qris: #ea580c;
+            --accent-bank: #2563eb;
+            --accent-cashier: #16a34a;
+            --radius-sm: 0.5rem;
+            --radius-md: 0.85rem;
+            --radius-full: 9999px;
+            --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.05);
+            --shadow-card: 0 12px 30px rgba(28, 25, 23, 0.06);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-body);
+            color: var(--text-main);
+            font: 0.9rem 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: inherit; text-decoration: none; }
+        button, select { font: inherit; }
+        button:focus-visible, select:focus-visible, a:focus-visible {
+            outline: 3px solid rgba(234, 88, 12, 0.3);
+            outline-offset: 2px;
+        }
+        main {
+            width: min(100%, 1500px);
+            margin: 0 auto;
+            padding: 1.25rem clamp(1rem, 3vw, 2.5rem) 2.5rem;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+            padding: .85rem 0 1.1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        h1 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.35rem); letter-spacing: -.03em; }
+        header p { margin: .35rem 0 0; color: var(--text-muted); font-size: .8rem; line-height: 1.5; }
+        .app-brand { display: flex; align-items: center; gap: .65rem; flex-shrink: 0; }
+        .app-brand-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: .75rem; background: linear-gradient(145deg, #f97316, #ea580c); color: #fff; box-shadow: 0 5px 12px rgba(234,88,12,.2); }
+        .app-brand-name { display: block; font-size: .9rem; font-weight: 800; letter-spacing: -.02em; }
+        .app-brand-caption { display: block; margin-top: .12rem; color: var(--text-muted); font-size: .67rem; }
+        .page-heading { flex: 1; padding-left: 1.25rem; border-left: 1px solid var(--border-subtle); }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            min-height: 42px;
+            padding: .6rem .95rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--text-main);
+            font-size: .8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+        .btn:hover { transform: translateY(-1px); border-color: #d6d3d1; box-shadow: 0 4px 12px rgba(28,25,23,.08); }
+        .btn-primary { border-color: var(--primary); background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+        .btn-primary:hover { border-color: #c2410c; box-shadow: 0 6px 16px rgba(234,88,12,.2); }
+        .btn:disabled { cursor: wait; opacity: .65; }
+        .report-panel {
+            padding: clamp(1rem, 2.5vw, 1.5rem);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            background: var(--bg-card);
+            box-shadow: var(--shadow-card);
+        }
+        .analytics-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); gap: 1rem; margin: 1.1rem 0; }
+        .analytics-card { min-width: 0; padding: 1.1rem; border: 1px solid var(--border-subtle); border-radius: .9rem; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+        .analytics-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .65rem; }
+        .analytics-heading h3 { margin: 0; font-size: .92rem; letter-spacing: -.02em; }
+        .analytics-heading p { margin: .28rem 0 0; color: var(--text-muted); font-size: .73rem; line-height: 1.5; }
+        .chart-total { margin: .9rem 0 .25rem; font-size: 1.4rem; font-weight: 800; letter-spacing: -.04em; }
+        .chart-caption { color: var(--text-muted); font-size: .7rem; }
+        .revenue-chart { display: block; width: 100%; height: auto; min-height: 190px; overflow: visible; margin-top: .3rem; }
+        .chart-grid-line { stroke: #eeeae7; stroke-width: 1; }
+        .chart-area { fill: url(#revenue-area-gradient); }
+        .chart-line { fill: none; stroke: var(--primary); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+        .chart-point { fill: #fff; stroke: var(--primary); stroke-width: 2.5; }
+        .chart-axis-label { fill: #78716c; font: 11px 'Plus Jakarta Sans', sans-serif; }
+        .chart-empty { min-height: 210px; display: grid; place-items: center; padding: 1rem; color: var(--text-muted); text-align: center; font-size: .78rem; }
+        .payment-method-list { display: grid; gap: 1.05rem; margin-top: 1.35rem; }
+        .payment-method { display: grid; gap: .5rem; }
+        .payment-method-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+        .payment-method-name { display: flex; align-items: center; gap: .55rem; font-size: .78rem; font-weight: 700; }
+        .payment-method-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: .55rem; background: #f5f5f4; color: var(--method-color); }
+        .payment-method-total { font-size: .78rem; font-weight: 800; white-space: nowrap; }
+        .payment-method-meta { display: flex; justify-content: space-between; color: var(--text-muted); font-size: .68rem; }
+        .payment-track { height: 8px; overflow: hidden; border-radius: 999px; background: #f1f0ee; }
+        .payment-fill { width: 0; height: 100%; border-radius: inherit; background: var(--method-color); transition: width .35s ease; }
+        .payment-empty { color: var(--text-muted); font-size: .76rem; line-height: 1.6; }
+        .table-heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin: 1.45rem 0 .65rem; }
+        .table-heading h3 { margin: 0; font-size: .92rem; }
+        .table-count { color: var(--text-muted); font-size: .72rem; }
+        .report-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .report-toolbar h2 { margin: 0; font-size: 1.05rem; letter-spacing: -.02em; }
+        .report-toolbar p { margin: .35rem 0 0; color: var(--text-muted); font-size: .78rem; line-height: 1.5; }
+        .report-actions { display: flex; align-items: end; gap: .55rem; flex-wrap: wrap; }
+        .period-field { display: grid; gap: .3rem; }
+        .period-field label { color: var(--text-muted); font-size: .7rem; font-weight: 700; }
+        select { min-height: 42px; min-width: 148px; padding: .5rem 2rem .5rem .75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: #fff; color: var(--text-main); font-size: .82rem; }
+        .report-summary { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: .85rem; margin-bottom: 1.15rem; }
+        .report-stat {
+            min-height: 108px;
+            display: flex;
+            align-items: flex-start;
+            gap: .8rem;
+            padding: 1rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: .85rem;
+            background: linear-gradient(145deg, #fff 0%, #fafaf9 100%);
+        }
+        .report-stat.primary-stat { border-color: #fed7aa; background: linear-gradient(145deg, #fff7ed 0%, #fff 100%); }
+        .stat-icon { width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center; border-radius: .7rem; background: #f5f5f4; color: #57534e; }
+        .primary-stat .stat-icon { background: #ffedd5; color: var(--primary); }
+        .report-stat span { display: block; color: var(--text-muted); font-size: .73rem; font-weight: 700; }
+        .report-stat strong { display: block; margin-top: .45rem; font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.25; letter-spacing: -.03em; overflow-wrap: anywhere; }
+        .report-message { min-height: 40px; display: flex; align-items: center; gap: .55rem; margin: .2rem 0 .65rem; color: var(--text-muted); font-size: .78rem; }
+        .report-table-wrap { overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: .75rem; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: .85rem .8rem; border-bottom: 1px solid var(--border-subtle); font-size: .78rem; white-space: nowrap; }
+        th { position: sticky; top: 0; background: #fafaf9; color: var(--text-muted); font-size: .7rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+        tbody tr:last-child td { border-bottom: 0; }
+        tbody tr:hover { background: #fffaf6; }
+        td:last-child { color: #9a3412; font-weight: 800; }
+        @media (max-width: 900px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            main { padding: .75rem .75rem 1.5rem; }
+            header { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .65rem; margin-bottom: 1rem; padding: .4rem 0 .85rem; }
+            .app-brand { grid-column: 1; grid-row: 1; }
+            .page-heading { grid-column: 1 / -1; grid-row: 2; padding: .6rem 0 0; border: 0; }
+            header > a { grid-column: 2; grid-row: 1; min-height: 40px; min-width: 40px; padding: .5rem .65rem; font-size: 0; }
+            header > a i { font-size: .9rem; }
+            h1 { font-size: 1.05rem; }
+            header p { max-width: 42ch; font-size: .74rem; }
+            .report-panel { padding: .9rem; }
+            .report-toolbar { align-items: flex-start; }
+            .report-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; }
+            .period-field { grid-column: 1 / -1; }
+            select { width: 100%; }
+            .report-summary { grid-template-columns: 1fr 1fr; gap: .6rem; }
+            .report-stat { min-height: 92px; gap: .55rem; padding: .75rem; }
+            .report-stat.primary-stat { grid-column: 1 / -1; }
+            .stat-icon { width: 34px; height: 34px; flex-basis: 34px; font-size: .85rem; }
+            .report-stat span { font-size: .67rem; }
+            .report-stat strong { font-size: 1.05rem; }
+            .analytics-grid { gap: .75rem; margin: .8rem 0; }
+            .analytics-card { padding: .9rem; }
+            .revenue-chart { min-height: 170px; }
+            .chart-total { font-size: 1.25rem; }
+            .report-message { align-items: flex-start; padding: .55rem .65rem; border-radius: .6rem; background: #fafaf9; font-size: .73rem; }
+            .report-table-wrap { overflow: visible; border: 0; }
+            table, tbody { display: block; width: 100%; }
+            thead { display: none; }
+            tbody { display: grid; gap: .65rem; }
+            tbody tr { display: grid; gap: 0; padding: .25rem .75rem; border: 1px solid var(--border-subtle); border-radius: .75rem; background: #fff; }
+            tbody tr:hover { background: #fff; }
+            td, td:last-child { display: grid; grid-template-columns: minmax(95px, .75fr) 1.25fr; gap: .5rem; padding: .6rem 0; border-bottom: 1px solid #f5f5f4; color: var(--text-main); font-size: .75rem; white-space: normal; overflow-wrap: anywhere; }
+            td:last-child { color: #9a3412; }
+            td::before { content: attr(data-label); color: var(--text-muted); font-size: .68rem; font-weight: 700; }
+            td:last-child { border-bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <a class="app-brand" href="../" aria-label="UsahaWeb">
+                <span class="app-brand-mark"><i class="fas fa-store"></i></span>
+                <span><span class="app-brand-name">UsahaWeb</span><span class="app-brand-caption">Panel analitik</span></span>
+            </a>
+            <div class="page-heading">
+                <h1>Laporan Penjualan</h1>
+                <p>Ringkasan pesanan dan nilai transaksi yang tidak dibatalkan.</p>
+            </div>
+            <a class="btn" href="../admin/" aria-label="Kembali ke admin"><i class="fas fa-arrow-left"></i><span>Kembali ke Admin</span></a>
+        </header>
+        <section class="report-panel">
+            <div class="report-toolbar">
+                <div>
+                    <h2><i class="fas fa-chart-line" style="color:var(--primary);"></i> Ringkasan Penjualan</h2>
+                    <p>Pesanan yang berhasil dikirim akan tercatat, termasuk pesanan yang masih diproses.</p>
+                </div>
+                <div class="report-actions">
+                    <div class="period-field">
+                        <label for="report-period">Periode laporan</label>
+                        <select id="report-period" onchange="renderSalesReport()">
+                            <option value="today">Hari ini</option>
+                            <option value="month">Bulan ini</option>
+                            <option value="all">Semua data</option>
+                        </select>
+                    </div>
+                    <button class="btn" id="refresh-report" type="button" onclick="loadSalesReport(true)"><i class="fas fa-sync-alt"></i><span>Muat ulang</span></button>
+                    <button class="btn btn-primary" type="button" onclick="exportSalesReport()"><i class="fas fa-download"></i><span>Ekspor CSV</span></button>
+                </div>
+            </div>
+            <div class="report-summary">
+                <div class="report-stat primary-stat">
+                    <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                    <div><span>Total penjualan</span><strong id="report-revenue">Rp 0</strong></div>
+                </div>
+                <div class="report-stat">
+                    <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+                    <div><span>Pesanan tercatat</span><strong id="report-order-count">0</strong></div>
+                </div>
+                <div class="report-stat">
+                    <div class="stat-icon"><i class="fas fa-chart-simple"></i></div>
+                    <div><span>Rata-rata pesanan</span><strong id="report-average">Rp 0</strong></div>
+                </div>
+            </div>
+            <div class="analytics-grid">
+                <section class="analytics-card" aria-labelledby="revenue-chart-title">
+                    <div class="analytics-heading">
+                        <div>
+                            <h3 id="revenue-chart-title">Grafik Pendapatan</h3>
+                            <p id="revenue-chart-description">Pergerakan nilai pesanan berdasarkan periode yang dipilih.</p>
+                        </div>
+                        <span class="stat-icon" aria-hidden="true"><i class="fas fa-chart-line"></i></span>
+                    </div>
+                    <div class="chart-total" id="chart-period-total">Rp 0</div>
+                    <div class="chart-caption" id="chart-period-caption">Total nilai transaksi pada periode ini</div>
+                    <svg class="revenue-chart" id="revenue-chart" viewBox="0 0 760 280" role="img" aria-labelledby="revenue-chart-title revenue-chart-description"></svg>
+                    <p class="chart-empty" id="revenue-chart-empty" hidden></p>
+                </section>
+                <section class="analytics-card" aria-labelledby="payment-chart-title">
+                    <div class="analytics-heading">
+                        <div>
+                            <h3 id="payment-chart-title">Metode Pembayaran</h3>
+                            <p>Nilai dan jumlah pesanan menurut metode pembayaran.</p>
+                        </div>
+                        <span class="stat-icon" aria-hidden="true"><i class="fas fa-credit-card"></i></span>
+                    </div>
+                    <div class="payment-method-list" id="payment-method-list"></div>
+                </section>
+            </div>
+            <p id="report-message" class="report-message" role="status" aria-live="polite"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i><span>Memuat laporan penjualan...</span></p>
+            <div class="table-heading">
+                <h3>Transaksi</h3>
+                <span class="table-count" id="table-count">0 transaksi</span>
+            </div>
+            <div class="report-table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Waktu</th><th>ID Pesanan</th><th>Meja</th><th>Status</th><th>Metode bayar</th><th>Total</th></tr>
+                    </thead>
+                    <tbody id="report-orders"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <script>
+        const SUPABASE_URL = 'https://xqcbyamxiekdxytntlno.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2J5YW14aWVrZHh5dG50bG5vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MTM2NDIsImV4cCI6MjEwNTk4OTY0Mn0.pkytlWwjfKOQT9bWNS-nuNZReE7jFUi3ITk5ageyrkM';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let reportOrders = [];
+        let reportLoaded = false;
+        let reportLoading = false;
+
+        function isOrderTimestamp(value) {
+            return typeof value === 'string'
+                && /^\d{4}-\d{2}-\d{2}T/.test(value)
+                && !Number.isNaN(new Date(value).getTime());
+        }
+
+        function formatReportTime(value) {
+            if (!isOrderTimestamp(value)) return value ? `Tanggal tidak tersedia (${value})` : 'Tanggal tidak tersedia';
+            return new Date(value).toLocaleString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function loadSalesReport(forceReload = false) {
+            if (reportLoading) return;
+            if (reportLoaded && !forceReload) {
+                renderSalesReport();
+                return;
+            }
+
+            const message = document.getElementById('report-message');
+            const refreshButton = document.getElementById('refresh-report');
+            message.textContent = 'Memuat data laporan...';
+            refreshButton.disabled = true;
+            reportLoading = true;
+            const allOrders = [];
+            const pageSize = 1000;
+
+            try {
+                for (let offset = 0; ; offset += pageSize) {
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .select('id, table, time, total, status, paymentMethod')
+                        .order('time', { ascending: false })
+                        .order('id', { ascending: false })
+                        .range(offset, offset + pageSize - 1);
+                    if (error) throw error;
+
+                    allOrders.push(...(data || []));
+                    if (!data || data.length < pageSize) break;
+                }
+
+                reportOrders = allOrders.sort((a, b) => {
+                    const dateA = isOrderTimestamp(a.time) ? new Date(a.time).getTime() : 0;
+                    const dateB = isOrderTimestamp(b.time) ? new Date(b.time).getTime() : 0;
+                    return dateB - dateA;
+                });
+                reportLoaded = true;
+                renderSalesReport();
+            } catch (error) {
+                const errorCode = error.code || error.status;
+                const errorMessage = error.message || 'Kesalahan tidak diketahui.';
+                message.textContent = `Laporan gagal dimuat${errorCode ? ` (${errorCode})` : ''}: ${errorMessage}`;
+                console.error('Sales report load failed:', error);
+            } finally {
+                reportLoading = false;
+                refreshButton.disabled = false;
+            }
+        }
+
+        function getFilteredSales() {
+            const period = document.getElementById('report-period').value;
+            const now = new Date();
+            return reportOrders.filter((order) => {
+                const status = String(order.status || '').trim().toLowerCase();
+                if (status.includes('batal') || status.includes('cancel')) return false;
+                if (period === 'all') return true;
+                if (!isOrderTimestamp(order.time)) return false;
+
+                const date = new Date(order.time);
+                if (period === 'today') {
+                    return date.getFullYear() === now.getFullYear()
+                        && date.getMonth() === now.getMonth()
+                        && date.getDate() === now.getDate();
+                }
+                return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+            });
+        }
+
+        function normalizePaymentMethod(value) {
+            const method = String(value || '').trim().toLowerCase();
+            if (method.includes('qris')) return 'qris';
+            if (method.includes('bank') || method.includes('transfer')) return 'bank';
+            if (method.includes('kasir') || method.includes('tunai') || method.includes('cash')) return 'cashier';
+            return 'other';
+        }
+
+        function renderPaymentMethods(orders) {
+            const methods = [
+                { id: 'qris', label: 'QRIS', icon: 'fa-qrcode', color: 'var(--accent-qris)' },
+                { id: 'bank', label: 'Transfer bank', icon: 'fa-building-columns', color: 'var(--accent-bank)' },
+                { id: 'cashier', label: 'Bayar di kasir', icon: 'fa-cash-register', color: 'var(--accent-cashier)' },
+                { id: 'other', label: 'Metode lainnya', icon: 'fa-ellipsis', color: '#78716c' }
+            ];
+            const totals = new Map(methods.map((method) => [method.id, { amount: 0, count: 0 }]));
+            orders.forEach((order) => {
+                const bucket = totals.get(normalizePaymentMethod(order.paymentMethod));
+                bucket.amount += Number(order.total) || 0;
+                bucket.count += 1;
+            });
+
+            const totalAmount = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            const list = document.getElementById('payment-method-list');
+            list.replaceChildren();
+            methods.forEach((method) => {
+                const value = totals.get(method.id);
+                if (method.id === 'other' && value.count === 0) return;
+                const share = totalAmount > 0 ? Math.min(100, value.amount / totalAmount * 100) : 0;
+                const item = document.createElement('div');
+                item.className = 'payment-method';
+                item.style.setProperty('--method-color', method.color);
+                item.innerHTML = `
+                    <div class="payment-method-top">
+                        <span class="payment-method-name"><span class="payment-method-icon"><i class="fas ${method.icon}" aria-hidden="true"></i></span>${method.label}</span>
+                        <span class="payment-method-total">${formatCurrency(value.amount)}</span>
+                    </div>
+                    <div class="payment-track" role="progressbar" aria-label="Bagian penjualan ${method.label}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(share)}">
+                        <div class="payment-fill" style="width:${share}%"></div>
+                    </div>
+                    <div class="payment-method-meta"><span>${value.count.toLocaleString('id-ID')} pesanan</span><span>${share.toFixed(share % 1 ? 1 : 0)}%</span></div>
+                `;
+                list.appendChild(item);
+            });
+
+            if (orders.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'payment-empty';
+                empty.textContent = 'Belum ada data pembayaran pada periode yang dipilih.';
+                list.appendChild(empty);
+            }
+        }
+
+        function createChartElement(name, attributes = {}) {
+            const element = document.createElementNS('http://www.w3.org/2000/svg', name);
+            Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+            return element;
+        }
+
+        function formatCompactCurrency(value) {
+            const compact = new Intl.NumberFormat('id-ID', {
+                notation: 'compact',
+                maximumFractionDigits: 1
+            }).format(value);
+            return `Rp ${compact}`;
+        }
+
+        function getRevenueBuckets(orders, period) {
+            const now = new Date();
+            if (period === 'today') {
+                return Array.from({ length: 24 }, (_, hour) => ({
+                    label: `${String(hour).padStart(2, '0')}.00`,
+                    shortLabel: `${String(hour).padStart(2, '0')}`,
+                    amount: 0
+                })).map((bucket, hour) => {
+                    bucket.amount = orders.reduce((sum, order) => {
+                        if (!isOrderTimestamp(order.time)) return sum;
+                        const date = new Date(order.time);
+                        return date.getFullYear() === now.getFullYear()
+                            && date.getMonth() === now.getMonth()
+                            && date.getDate() === now.getDate()
+                            && date.getHours() === hour
+                            ? sum + (Number(order.total) || 0)
+                            : sum;
+                    }, 0);
+                    return bucket;
+                });
+            }
+
+            if (period === 'month') {
+                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                return Array.from({ length: daysInMonth }, (_, index) => {
+                    const day = index + 1;
+                    const amount = orders.reduce((sum, order) => {
+                        if (!isOrderTimestamp(order.time)) return sum;
+                        const date = new Date(order.time);
+                        return date.getFullYear() === now.getFullYear()
+                            && date.getMonth() === now.getMonth()
+                            && date.getDate() === day
+                            ? sum + (Number(order.total) || 0)
+                            : sum;
+                    }, 0);
+                    return { label: `${day} ${now.toLocaleString('id-ID', { month: 'short' })}`, shortLabel: String(day), amount };
+                });
+            }
+
+            const monthlyTotals = new Map();
+            orders.forEach((order) => {
+                if (!isOrderTimestamp(order.time)) return;
+                const date = new Date(order.time);
+                const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                monthlyTotals.set(key, (monthlyTotals.get(key) || 0) + (Number(order.total) || 0));
+            });
+            return [...monthlyTotals.entries()]
+                .sort(([a], [b]) => a.localeCompare(b))
+                .slice(-12)
+                .map(([key, amount]) => {
+                    const [year, month] = key.split('-').map(Number);
+                    const date = new Date(year, month - 1, 1);
+                    return {
+                        label: date.toLocaleString('id-ID', { month: 'short', year: 'numeric' }),
+                        shortLabel: date.toLocaleString('id-ID', { month: 'short' }),
+                        amount
+                    };
+                });
+        }
+
+        function renderRevenueChart(orders) {
+            const period = document.getElementById('report-period').value;
+            const svg = document.getElementById('revenue-chart');
+            const empty = document.getElementById('revenue-chart-empty');
+            const caption = document.getElementById('chart-period-caption');
+            const total = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            document.getElementById('chart-period-total').textContent = formatCurrency(total);
+            caption.textContent = period === 'today'
+                ? 'Total transaksi hari ini · grafik per jam'
+                : period === 'month'
+                    ? 'Total transaksi bulan ini · grafik per hari'
+                    : 'Total seluruh transaksi · grafik menampilkan 12 bulan terakhir';
+
+            const datedOrders = orders.filter((order) => isOrderTimestamp(order.time));
+            const buckets = getRevenueBuckets(datedOrders, period);
+            svg.replaceChildren();
+            if (buckets.length === 0 || datedOrders.length === 0) {
+                svg.hidden = true;
+                empty.hidden = false;
+                empty.textContent = orders.length
+                    ? 'Grafik tidak tersedia karena transaksi lama belum memiliki tanggal lengkap.'
+                    : 'Belum ada transaksi pada periode ini.';
+                return;
+            }
+
+            empty.hidden = true;
+            svg.hidden = false;
+            const width = 760;
+            const height = 280;
+            const left = 78;
+            const right = 18;
+            const top = 18;
+            const bottom = 236;
+            const plotWidth = width - left - right;
+            const plotHeight = bottom - top;
+            const maxValue = Math.max(...buckets.map((bucket) => bucket.amount), 1);
+            const chartMax = Math.ceil(maxValue / 4) * 4 || 4;
+            const defs = createChartElement('defs');
+            const gradient = createChartElement('linearGradient', { id: 'revenue-area-gradient', x1: '0', x2: '0', y1: '0', y2: '1' });
+            gradient.append(
+                createChartElement('stop', { offset: '0%', 'stop-color': '#f97316', 'stop-opacity': '.22' }),
+                createChartElement('stop', { offset: '100%', 'stop-color': '#f97316', 'stop-opacity': '0' })
+            );
+            defs.appendChild(gradient);
+            svg.appendChild(defs);
+
+            for (let index = 0; index <= 4; index += 1) {
+                const y = top + (plotHeight / 4) * index;
+                const value = chartMax * (4 - index) / 4;
+                svg.appendChild(createChartElement('line', { x1: left, y1: y, x2: width - right, y2: y, class: 'chart-grid-line' }));
+                const label = createChartElement('text', { x: left - 10, y: y + 4, 'text-anchor': 'end', class: 'chart-axis-label' });
+                label.textContent = formatCompactCurrency(value);
+                svg.appendChild(label);
+            }
+
+            const points = buckets.map((bucket, index) => {
+                const x = buckets.length === 1 ? left + plotWidth / 2 : left + plotWidth * index / (buckets.length - 1);
+                const y = bottom - plotHeight * bucket.amount / chartMax;
+                return { x, y, bucket };
+            });
+            const linePath = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+            const areaPath = `${linePath} L ${points[points.length - 1].x} ${bottom} L ${points[0].x} ${bottom} Z`;
+            svg.append(
+                createChartElement('path', { d: areaPath, class: 'chart-area' }),
+                createChartElement('path', { d: linePath, class: 'chart-line' })
+            );
+
+            points.forEach((point, index) => {
+                const circle = createChartElement('circle', { cx: point.x, cy: point.y, r: buckets.length > 40 ? 2 : 3.5, class: 'chart-point' });
+                const title = createChartElement('title');
+                title.textContent = `${point.bucket.label}: ${formatCurrency(point.bucket.amount)}`;
+                circle.appendChild(title);
+                svg.appendChild(circle);
+                const labelStep = Math.max(1, Math.ceil(buckets.length / 6));
+                if (index % labelStep === 0 || index === points.length - 1) {
+                    const axisLabel = createChartElement('text', {
+                        x: point.x,
+                        y: 260,
+                        'text-anchor': index === 0 ? 'start' : index === points.length - 1 ? 'end' : 'middle',
+                        class: 'chart-axis-label'
+                    });
+                    axisLabel.textContent = point.bucket.shortLabel;
+                    svg.appendChild(axisLabel);
+                }
+            });
+        }
+
+        function renderSalesReport() {
+            const orders = getFilteredSales();
+            const revenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            document.getElementById('report-revenue').textContent = formatCurrency(revenue);
+            document.getElementById('report-order-count').textContent = orders.length.toLocaleString('id-ID');
+            document.getElementById('report-average').textContent = formatCurrency(orders.length ? Math.round(revenue / orders.length) : 0);
+            document.getElementById('table-count').textContent = `${orders.length.toLocaleString('id-ID')} transaksi`;
+            renderRevenueChart(orders);
+            renderPaymentMethods(orders);
+
+            const tableBody = document.getElementById('report-orders');
+            tableBody.replaceChildren();
+            orders.forEach((order) => {
+                const row = document.createElement('tr');
+                [['Waktu', formatReportTime(order.time)], ['ID Pesanan', order.id || '-'], ['Meja', order.table || '-'], ['Status', order.status || 'Menunggu'], ['Metode bayar', order.paymentMethod || 'Tunai'], ['Total', formatCurrency(Number(order.total) || 0)]]
+                    .forEach(([label, value]) => {
+                        const cell = document.createElement('td');
+                        cell.dataset.label = label;
+                        cell.textContent = value;
+                        row.appendChild(cell);
+                    });
+                tableBody.appendChild(row);
+            });
+
+            const message = document.getElementById('report-message');
+            if (!reportLoaded) {
+                message.textContent = 'Memuat data laporan...';
+            } else if (orders.length === 0) {
+                const legacyCount = reportOrders.filter((order) => {
+                    const status = String(order.status || '').trim().toLowerCase();
+                    return !status.includes('batal') && !status.includes('cancel') && !isOrderTimestamp(order.time);
+                }).length;
+                message.textContent = legacyCount && document.getElementById('report-period').value !== 'all'
+                    ? `Belum ada pesanan pada periode ini. ${legacyCount} pesanan lama tidak memiliki tanggal kalender; pilih Semua data untuk melihatnya.`
+                    : 'Belum ada pesanan pada periode ini.';
+            } else {
+                const legacyCount = orders.filter((order) => !isOrderTimestamp(order.time)).length;
+                message.textContent = legacyCount
+                    ? `${orders.length} pesanan tercatat. ${legacyCount} pesanan lama tidak memiliki tanggal kalender dan hanya dapat ditampilkan pada periode Semua data.`
+                    : `${orders.length} pesanan tercatat pada periode yang dipilih.`;
+            }
+        }
+
+        function formatCurrency(amount) {
+            return `Rp ${amount.toLocaleString('id-ID')}`;
+        }
+
+        function exportSalesReport() {
+            const orders = getFilteredSales();
+            if (orders.length === 0) {
+                document.getElementById('report-message').textContent = 'Tidak ada data penjualan untuk diekspor pada periode ini.';
+                return;
+            }
+
+            const escapeCsv = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+            const rows = [
+                ['Waktu', 'ID Pesanan', 'Meja', 'Status', 'Metode Pembayaran', 'Total'],
+                ...orders.map((order) => [
+                    formatReportTime(order.time),
+                    order.id || '',
+                    order.table || '',
+                    order.status || 'Menunggu',
+                    order.paymentMethod || 'Tunai',
+                    Number(order.total) || 0
+                ])
+            ];
+            const csv = `\uFEFF${rows.map((row) => row.map(escapeCsv).join(',')).join('\r\n')}`;
+            const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `laporan-penjualan-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSalesReport();
+            supabaseClient
+                .channel('sales-report-orders')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => loadSalesReport(true))
+                .subscribe((status) => {
+                    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                        console.error('Sales report realtime subscription failed:', status);
+                    }
+                });
+            window.setInterval(() => loadSalesReport(true), 30000);
+        });
+    </script>
+</body>
+</html>
