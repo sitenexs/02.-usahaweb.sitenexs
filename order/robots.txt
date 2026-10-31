@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://usahaweb.sitenexs.site/order/sitemap.xml
+Sitemap: https://usahaweb.sitenexs.com/order/sitemap.xml
